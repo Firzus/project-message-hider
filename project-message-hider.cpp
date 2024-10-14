@@ -17,6 +17,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight);
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -97,7 +99,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Stocke le handle d'instance dans la variable globale
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, 
+       WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -146,7 +149,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
+
             // TODO: Ajoutez ici le code de dessin qui utilise hdc...
+            ImageManager imageManager;
+            imageManager.paintImage(hdc);
+            AdjustWindowSize(hWnd, imageManager.actualImageWidth, imageManager.actualImageHeight);
+
             EndPaint(hWnd, &ps);
         }
         break;
@@ -177,4 +185,19 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight)
+{
+    // Récupérer la taille de la fenêtre et du client
+    RECT rcClient, rcWindow;
+    GetClientRect(hwnd, &rcClient);
+    GetWindowRect(hwnd, &rcWindow);
+
+    // Calculer la taille de la bordure de la fenêtre
+    int borderWidth = (rcWindow.right - rcWindow.left) - rcClient.right;
+    int borderHeight = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
+
+    // Ajuster la taille de la fenêtre en fonction de l'image
+    SetWindowPos(hwnd, nullptr, 0, 0, imageWidth + borderWidth, imageHeight + borderHeight, SWP_NOMOVE | SWP_NOZORDER);
 }
