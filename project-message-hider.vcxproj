@@ -109,6 +109,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)resources" "$(TargetDir)resources"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -125,6 +128,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)resources" "$(TargetDir)resources"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
@@ -141,6 +147,68 @@
   <ItemGroup>
     <Image Include="project-message-hider.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\fonts\Inter_18pt-Black.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-BlackItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Bold.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-BoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-ExtraBold.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-ExtraBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-ExtraLight.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-ExtraLightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Italic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Light.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-LightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Medium.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-MediumItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Regular.ttf">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <FileType>Font</FileType>
+    </Font>
+    <Font Include="resources\fonts\Inter_18pt-SemiBold.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-SemiBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-Thin.ttf" />
+    <Font Include="resources\fonts\Inter_18pt-ThinItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Black.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-BlackItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Bold.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-BoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-ExtraBold.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-ExtraBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-ExtraLight.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-ExtraLightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Italic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Light.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-LightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Medium.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-MediumItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Regular.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-SemiBold.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-SemiBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-Thin.ttf" />
+    <Font Include="resources\fonts\Inter_24pt-ThinItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Black.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-BlackItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Bold.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-BoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-ExtraBold.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-ExtraBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-ExtraLight.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-ExtraLightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Italic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Light.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-LightItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Medium.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-MediumItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Regular.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-SemiBold.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-SemiBoldItalic.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-Thin.ttf" />
+    <Font Include="resources\fonts\Inter_28pt-ThinItalic.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

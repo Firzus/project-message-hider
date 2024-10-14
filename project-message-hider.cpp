@@ -1,12 +1,6 @@
-// project-message-hider.cpp : Définit le point d'entrée de l'application.
-//
-
 #include "framework.h"
 #include "project-message-hider.h"
-
-// Aditional libs
 #include <string>
-#include <iostream>
 
 #define MAX_LOADSTRING 100
 
@@ -20,18 +14,6 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
-// Fonction pour obtenir le répertoire du projet
-std::wstring GetProjectDirectoryFromEnv() {
-    wchar_t buffer[MAX_PATH];
-    if (GetEnvironmentVariableW(L"PROJECT_ROOT", buffer, MAX_PATH)) {
-        return std::wstring(buffer);
-    }
-    else {
-        MessageBoxW(NULL, L"Variable d'environnement PROJECT_ROOT non définie.", L"Erreur", MB_OK | MB_ICONERROR);
-        return L"";
-    }
-}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -71,13 +53,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
-//
-//  FONCTION : MyRegisterClass()
-//
-//  OBJECTIF : Inscrit la classe de fenêtre.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -99,16 +74,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FONCTION : InitInstance(HINSTANCE, int)
-//
-//   OBJECTIF : enregistre le handle d'instance et crée une fenêtre principale
-//
-//   COMMENTAIRES :
-//
-//        Dans cette fonction, nous enregistrons le handle de l'instance dans une variable globale, puis
-//        nous créons et affichons la fenêtre principale du programme.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Stocke le handle d'instance dans la variable globale
@@ -126,19 +91,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    return TRUE;
 }
-
-//
-//  FONCTION : WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  OBJECTIF : Traite les messages pour la fenêtre principale.
-//
-//  WM_COMMAND  - traite le menu de l'application
-//  WM_PAINT    - Dessine la fenêtre principale
-//  WM_DESTROY  - génère un message d'arrêt et retourne
-//
-//
-
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -166,22 +118,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CREATE:
         {
-            // Obtenir le répertoire du projet à partir de la variable d'environnement
-            std::wstring projectDir = GetProjectDirectoryFromEnv();
-            if (projectDir.empty()) {
-                PostQuitMessage(1);
-                return -1;
-            }
+            std::wstring fontPathRegular = L"resources/fonts/Inter-Regular.ttf";
 
-            // Construire les chemins vers les polices
-            std::wstring fontPathRegular = projectDir + L"\\ressources\\fonts\\Inter_18pt-Regular.ttf";
-
-            // Afficher fontPathRegular pour déboguer son contenu
-            MessageBoxW(hWnd, fontPathRegular.c_str(), L"Chemin de la Police Regular", MB_OK);
-            OutputDebugStringW(fontPathRegular.c_str());
-            OutputDebugStringW(L"\n");
-
-            fontCountRegular = AddFontResourceEx(fontPathRegular.c_str(), FR_PRIVATE, 0);
+            // Charger la police avec AddFontResourceEx
+            int fontCountRegular = AddFontResourceEx(fontPathRegular.c_str(), FR_PRIVATE, 0);
 
             if (fontCountRegular > 0) {
                 hFontRegular = CreateFont(
