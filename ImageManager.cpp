@@ -51,7 +51,7 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
 void ImageManager::paintImage(HDC hdc)
 {
     // Charger l'image PNG avec WIC
-    HBITMAP hBitmap = LoadPNGImage(L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/Paysage.png", hdc);
+    HBITMAP hBitmap = LoadPNGImage(L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/hd.png", hdc);
 
     if (hBitmap)
     {
@@ -61,11 +61,21 @@ void ImageManager::paintImage(HDC hdc)
         BITMAP bitmap;
         GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
-        actualImageWidth = bitmap.bmWidth;
-        actualImageHeight = bitmap.bmHeight;
 
-        // Fonction pour dessiner l'image
-        BitBlt(hdc, 0, 0, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+        // Les dimensions sont inférieurs à 1920x1080 pour prendre en compte 
+        // le bandeau de la fenêtre et la barre des tâches de Windows
+        if (bitmap.bmWidth <= 1900 && bitmap.bmHeight <= 980)
+        {
+            actualImageWidth = bitmap.bmWidth;
+            actualImageHeight = bitmap.bmHeight;
+
+            // Fonction pour dessiner l'image
+            BitBlt(hdc, 0, 0, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+        }
+        else
+        {
+            // Affiche une erreur: "L'image est trop grande"
+        }
 
         DeleteDC(hdcMem);
         DeleteObject(hBitmap);

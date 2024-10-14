@@ -198,6 +198,7 @@ void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight)
     int borderWidth = (rcWindow.right - rcWindow.left) - rcClient.right;
     int borderHeight = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
 
+
     // Ajuster la taille de la fenêtre en fonction de l'image
     SetWindowPos(hwnd, nullptr, 0, 0, imageWidth + borderWidth, imageHeight + borderHeight, SWP_NOMOVE | SWP_NOZORDER);
 }
