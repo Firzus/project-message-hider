@@ -4,6 +4,10 @@
 #include "framework.h"
 #include "project-message-hider.h"
 
+// Aditional libs
+#include <string>
+#include <iostream>
+
 #define MAX_LOADSTRING 100
 
 // Variables globales :
@@ -16,6 +20,18 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// Fonction pour obtenir le répertoire du projet
+std::wstring GetProjectDirectoryFromEnv() {
+    wchar_t buffer[MAX_PATH];
+    if (GetEnvironmentVariableW(L"PROJECT_ROOT", buffer, MAX_PATH)) {
+        return std::wstring(buffer);
+    }
+    else {
+        MessageBoxW(NULL, L"Variable d'environnement PROJECT_ROOT non définie.", L"Erreur", MB_OK | MB_ICONERROR);
+        return L"";
+    }
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -121,8 +137,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - génère un message d'arrêt et retourne
 //
 //
+
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static HFONT hFontRegular, hFontBold;
+    static DWORD fontCountRegular = 0, fontCountBold = 0;
+
     switch (message)
     {
     case WM_COMMAND:
@@ -139,6 +161,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+        }
+        break;
+    case WM_CREATE:
+        {
+            // Obtenir le répertoire du projet à partir de la variable d'environnement
+            std::wstring projectDir = GetProjectDirectoryFromEnv();
+            if (projectDir.empty()) {
+                PostQuitMessage(1);
+                return -1;
+            }
+
+            // Construire les chemins vers les polices
+            std::wstring fontPathRegular = projectDir + L"\\ressources\\fonts\\Inter_18pt-Regular.ttf";
+
+            // Afficher fontPathRegular pour déboguer son contenu
+            MessageBoxW(hWnd, fontPathRegular.c_str(), L"Chemin de la Police Regular", MB_OK);
+            OutputDebugStringW(fontPathRegular.c_str());
+            OutputDebugStringW(L"\n");
+
+            fontCountRegular = AddFontResourceEx(fontPathRegular.c_str(), FR_PRIVATE, 0);
+
+            if (fontCountRegular > 0) {
+                hFontRegular = CreateFont(
+                    24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                    DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Inter"
+                );
+            }
+
+            if (fontCountRegular == 0) {
+                MessageBox(hWnd, L"Erreur : Impossible de charger une ou plusieurs polices.", L"Erreur", MB_OK | MB_ICONERROR);
             }
         }
         break;
