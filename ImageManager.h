@@ -10,5 +10,8 @@ public:
 
 private:
 	HBITMAP LoadPNGImage(LPCWSTR filePath, HDC hdc);
+	int widthLimit = 1200;
+	int heightLimit = 1200;
+	LPCWSTR filePath = L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/Foret.png";
 };
 

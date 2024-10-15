@@ -51,7 +51,7 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
 void ImageManager::paintImage(HDC hdc)
 {
     // Charger l'image PNG avec WIC
-    HBITMAP hBitmap = LoadPNGImage(L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/hd.png", hdc);
+    HBITMAP hBitmap = LoadPNGImage(filePath, hdc);
 
     if (hBitmap)
     {
@@ -62,9 +62,8 @@ void ImageManager::paintImage(HDC hdc)
         GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
 
-        // Les dimensions sont inférieurs à 1920x1080 pour prendre en compte 
-        // le bandeau de la fenêtre et la barre des tâches de Windows
-        if (bitmap.bmWidth <= 1900 && bitmap.bmHeight <= 980)
+        // On limite la taille de l'image à afficher
+        if (bitmap.bmWidth <= widthLimit && bitmap.bmHeight <= heightLimit)
         {
             actualImageWidth = bitmap.bmWidth;
             actualImageHeight = bitmap.bmHeight;
