@@ -51,7 +51,7 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
 void ImageManager::paintImage(HDC hdc)
 {
     // Charger l'image PNG avec WIC
-    HBITMAP hBitmap = LoadPNGImage(L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/hd.png", hdc);
+    HBITMAP hBitmap = LoadPNGImage(filePath, hdc);
 
     if (hBitmap)
     {
@@ -62,22 +62,38 @@ void ImageManager::paintImage(HDC hdc)
         GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
 
-        // Les dimensions sont inférieurs à 1920x1080 pour prendre en compte 
-        // le bandeau de la fenêtre et la barre des tâches de Windows
-        if (bitmap.bmWidth <= 1900 && bitmap.bmHeight <= 980)
+        // On limite les images qu'on peut importer en fonction de leurs dimensions
+        if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
         {
-            actualImageWidth = bitmap.bmWidth;
-            actualImageHeight = bitmap.bmHeight;
-
-            // Fonction pour dessiner l'image
-            BitBlt(hdc, 0, 0, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+            // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
+            const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
+            TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
         }
         else
         {
-            // Affiche une erreur: "L'image est trop grande"
+            // On transforme l'image en ratio 1:1 
+            // On récupère le côté le plus petit
+            UINT minDimension = min(bitmap.bmWidth, bitmap.bmHeight);
+
+            // On crée un offset en fonction du côté le plus grand
+            // pour centrer l'image
+            UINT xOffset = (bitmap.bmWidth > minDimension) ? (bitmap.bmWidth - minDimension) / 2 : 0;
+            UINT yOffset = (bitmap.bmHeight > minDimension) ? (bitmap.bmHeight - minDimension) / 2 : 0;
+
+            // On stocke la taille de l'image finale
+            actualImageDimensions = minDimension;
+
+            // Fonction pour dessiner l'image
+            BitBlt(hdc, 0, 0, minDimension, minDimension, hdcMem, xOffset, yOffset, SRCCOPY);
         }
 
         DeleteDC(hdcMem);
         DeleteObject(hBitmap);
+    }
+    else
+    {
+        // Affiche une erreur car l'image n'a pas pu être chargée
+        const wchar_t* errorMessage = L"Erreur: Impossible de charger l'image.";
+        TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
     }
 }

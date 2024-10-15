@@ -150,10 +150,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            // TODO: Ajoutez ici le code de dessin qui utilise hdc...
+            // Load et affiche l'image
             ImageManager imageManager;
             imageManager.paintImage(hdc);
-            AdjustWindowSize(hWnd, imageManager.actualImageWidth, imageManager.actualImageHeight);
+            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
 
             EndPaint(hWnd, &ps);
         }
