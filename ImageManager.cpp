@@ -73,10 +73,18 @@ void ImageManager::paintImage(HDC hdc)
         }
         else
         {
-            // Affiche une erreur: "L'image est trop grande"
+            // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
+            const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
+            TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
         }
 
         DeleteDC(hdcMem);
         DeleteObject(hBitmap);
+    }
+    else
+    {
+        // Affiche une erreur car l'image n'a pas pu être chargée
+        const wchar_t* errorMessage = L"Erreur: Impossible de charger l'image.";
+        TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
     }
 }
