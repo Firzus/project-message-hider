@@ -1,4 +1,6 @@
 ﻿  ImageManager.cpp
+C:\Users\theob\OneDrive\Bureau\GTech 4 - Projet 2\project-message-hider\ImageManager.cpp(80,44): warning C4018: '>' : incompatibilité signed/unsigned
+C:\Users\theob\OneDrive\Bureau\GTech 4 - Projet 2\project-message-hider\ImageManager.cpp(81,45): warning C4018: '>' : incompatibilité signed/unsigned
   project-message-hider.cpp
   Génération de code en cours...
   project-message-hider.vcxproj -> C:\Users\theob\OneDrive\Bureau\GTech 4 - Projet 2\project-message-hider\x64\Debug\project-message-hider.exe

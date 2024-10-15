@@ -62,20 +62,29 @@ void ImageManager::paintImage(HDC hdc)
         GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
 
-        // On limite la taille de l'image à afficher
-        if (bitmap.bmWidth <= widthLimit && bitmap.bmHeight <= heightLimit)
-        {
-            actualImageWidth = bitmap.bmWidth;
-            actualImageHeight = bitmap.bmHeight;
-
-            // Fonction pour dessiner l'image
-            BitBlt(hdc, 0, 0, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
-        }
-        else
+        // On limite les images qu'on peut importer en fonction de leurs dimensions
+        if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
         {
             // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
             const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
             TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
+        }
+        else
+        {
+            // On transforme l'image en ratio 1:1 
+            // On récupère le côté le plus petit
+            UINT minDimension = min(bitmap.bmWidth, bitmap.bmHeight);
+
+            // On crée un offset en fonction du côté le plus grand
+            // pour centrer l'image
+            UINT xOffset = (bitmap.bmWidth > minDimension) ? (bitmap.bmWidth - minDimension) / 2 : 0;
+            UINT yOffset = (bitmap.bmHeight > minDimension) ? (bitmap.bmHeight - minDimension) / 2 : 0;
+
+            // On stocke la taille de l'image finale
+            actualImageDimensions = minDimension;
+
+            // Fonction pour dessiner l'image
+            BitBlt(hdc, 0, 0, minDimension, minDimension, hdcMem, xOffset, yOffset, SRCCOPY);
         }
 
         DeleteDC(hdcMem);

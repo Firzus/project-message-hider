@@ -153,7 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Load et affiche l'image
             ImageManager imageManager;
             imageManager.paintImage(hdc);
-            AdjustWindowSize(hWnd, imageManager.actualImageWidth, imageManager.actualImageHeight);
+            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
 
             EndPaint(hWnd, &ps);
         }
