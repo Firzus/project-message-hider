@@ -2,6 +2,10 @@
 #include "project-message-hider.h"
 #include <string>
 
+#include "FontManager.h"
+#include "Theme.h"
+#include "Button.h"
+
 #define MAX_LOADSTRING 100
 
 // Variables globales :
@@ -14,6 +18,17 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// Déclaration de classes
+FontManager fontManager;
+Theme theme;
+
+static Button* btnPrimary;
+static Button* btnSecondary;
+
+static Button* btnSubmit;
+static Button* btnDownload;
+static Button* btnReset;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -94,54 +109,55 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static HFONT hFontRegular, hFontBold;
-    static DWORD fontCountRegular = 0, fontCountBold = 0;
+    static HFONT hFontTitle, hFontSubtitle, hFontParagraph, hFontLead, hFontLarge, hFontSmall, hFontMuted;
+    static DWORD fontCountTitle = 0, fontCountSubtitle = 0, fontCountParagraph = 0, fontCountLead = 0, fontCountLarge = 0, fontCountSmall = 0, fontCountMuted = 0;
 
     switch (message)
     {
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // Analyse les sélections de menu :
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
-        }
-        break;
     case WM_CREATE:
         {
-            std::wstring fontPathRegular = L"resources/fonts/Inter-Regular.ttf";
+		    fontManager.LoadFont(hWnd);
 
-            // Charger la police avec AddFontResourceEx
-            int fontCountRegular = AddFontResourceEx(fontPathRegular.c_str(), FR_PRIVATE, 0);
-
-            if (fontCountRegular > 0) {
-                hFontRegular = CreateFont(
-                    24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-                    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                    DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Inter"
-                );
-            }
-
-            if (fontCountRegular == 0) {
-                MessageBox(hWnd, L"Erreur : Impossible de charger une ou plusieurs polices.", L"Erreur", MB_OK | MB_ICONERROR);
-            }
+            // Créer deux boutons avec des styles différents
+            btnPrimary = new Button(hWnd, 50, 50, 150, 50, 101, true);   // Style primaire
+            btnSecondary = new Button(hWnd, 50, 120, 150, 50, 102, false); // Style secondaire
+         }
+        break;
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case 101:
+            btnPrimary->OnClick();
+            break;
+        case 102:
+            btnSecondary->OnClick();
+            break;
         }
         break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
+            HDC hdc = BeginPaint(hWnd, &ps);;
 
-            // TODO: Ajoutez ici le code de dessin qui utilise hdc...
+            btnPrimary->Draw(hdc);
+            btnSecondary->Draw(hdc);
+
+            //MessageBox(hWnd, L"Appel", L"Appel", MB_OK);
+
+            COLORREF backgroundColor = theme.GetColor(950);
+
+            // Créer une brosse avec la couleur
+            HBRUSH hBrush = CreateSolidBrush(backgroundColor);
+
+            //// Obtenir la zone entière de la fenêtre (client area)
+            RECT rect;
+            GetClientRect(hWnd, &rect);
+
+            //// Remplir le fond de la fenêtre avec la couleur
+            FillRect(hdc, &rect, hBrush);
+
+            //// Nettoyer la brosse
+            DeleteObject(hBrush);
+
             EndPaint(hWnd, &ps);
         }
         break;
