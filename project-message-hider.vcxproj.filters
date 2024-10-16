@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Fichiers de ressources\Fonts">
+      <UniqueIdentifier>{bcc7433d-e877-401c-bf03-30a944db5aab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers de ressources\Icons">
+      <UniqueIdentifier>{250fee54-90e4-4f19-b6d0-da630d410019}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,7 +33,22 @@
     <ClInclude Include="project-message-hider.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="ImageManager.h">
+    <ClInclude Include="FontManager.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Theme.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="TextComponent.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxComponent.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageComponent.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +56,22 @@
     <ClCompile Include="project-message-hider.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ImageManager.cpp">
+    <ClCompile Include="FontManager.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Theme.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="TextComponent.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxComponent.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageComponent.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,5 +87,37 @@
     <Image Include="project-message-hider.ico">
       <Filter>Fichiers de ressources</Filter>
     </Image>
+    <Image Include="resources\icons\input-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\input-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\output-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\output-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\set-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\set-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\fonts\Inter-ExtraBold.ttf">
+      <Filter>Fichiers de ressources\Fonts</Filter>
+    </Font>
+    <Font Include="resources\fonts\Inter-Medium.ttf">
+      <Filter>Fichiers de ressources\Fonts</Filter>
+    </Font>
+    <Font Include="resources\fonts\Inter-Regular.ttf">
+      <Filter>Fichiers de ressources\Fonts</Filter>
+    </Font>
+    <Font Include="resources\fonts\Inter-SemiBold.ttf">
+      <Filter>Fichiers de ressources\Fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>
