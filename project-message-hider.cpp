@@ -3,24 +3,29 @@
 #include <string>
 
 #include <shellscalingapi.h>
-
 #pragma comment(lib, "Shcore.lib")
+
+#include <gdiplus.h>
+#pragma comment (lib, "gdiplus.lib")
 
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
 #include "TextComponent.h"
 #include "BoxComponent.h"
+#include "ImageComponent.h"
+
+ULONG_PTR gdiplusToken;
 
 #define MAX_LOADSTRING 100
 
 // Ressources
-#define ICON_INPUT_LIGHT "ressources\\icons\\input-icon-light.png"
-#define ICON_INPUT_DARK "ressources\\icons\\input-icon-dark.png"
-#define ICON_OUTPUT_LIGHT "ressources\\icons\\output-icon-light.png"
-#define ICON_OUTPUT_DARK "ressources\\icons\\output-icon-dark.png"
-#define ICON_SET_LIGHT "ressources\\icons\\set-icon-light.png"
-#define ICON_SET_DARK "ressources\\icons\\set-icon-dark.png"
+#define ICON_INPUT_LIGHT L"resources\\icons\\input-icon-light.png"
+#define ICON_INPUT_DARK L"resources\\icons\\input-icon-dark.png"
+#define ICON_OUTPUT_LIGHT L"resources\\icons\\output-icon-light.png"
+#define ICON_OUTPUT_DARK L"resources\\icons\\output-icon-dark.png"
+#define ICON_SET_LIGHT L"resources\\icons\\set-icon-light.png"
+#define ICON_SET_DARK L"resources\\icons\\set-icon-dark.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -37,17 +42,45 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 FontManager fontManager;
 Theme theme;
 
+// Composants
+
+// Counter
+static TextComponent* counterText;
+static BoxComponent* counter1Box;
+static BoxComponent* counter2Box;
+static BoxComponent* counter3Box;
+
+// Title
 static TextComponent* titleText;
+
+// TODO : TO REMOVE, TEST ONLY
+std::wstring counterTextContent = L"1 of 3";
 
 static Button* btnPrimary;
 static Button* btnSecondary;
 
+// Buttons
 static Button* btnSubmit;
 static Button* btnDownload;
 static Button* btnReset;
 
-static BoxComponent* stepBox;
-static TextComponent* stepText;
+// Step 1
+static BoxComponent* step1Box;
+static TextComponent* step1Text;
+static ImageComponent* step1IconLight;
+static ImageComponent* step1IconDark;
+
+// Step 2
+static BoxComponent* step2Box;
+static TextComponent* step2Text;
+static ImageComponent* step2IconLight;
+static ImageComponent* step2IconDark;
+
+// Step 3
+static BoxComponent* step3Box;
+static TextComponent* step3Text;
+static ImageComponent* step3IconLight;
+static ImageComponent* step3IconDark;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -57,7 +90,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
+    step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
+
+	step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+	step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
+
+	step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+	step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+
+
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+
+    // Initialisation de GDI+
+    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -83,6 +130,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+    Gdiplus::GdiplusShutdown(gdiplusToken);
 
     return (int) msg.wParam;
 }
@@ -174,20 +223,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             FillRect(hdc, &rect, hBrush);
             DeleteObject(hBrush);
 
+            // Counter
+
+            counter1Box = new BoxComponent(hdc, 48, 48, 48, 8, theme.GetColor(900));
+            counter2Box = new BoxComponent(hdc, 100, 48, 48, 8, theme.GetColor(300));
+            counter3Box = new BoxComponent(hdc, 152, 48, 48, 8, theme.GetColor(300));
+            counterText = new TextComponent(hdc, counterTextContent, 48, 64, 37, fontManager.GetFontMuted(), theme.GetColor(950));
+
             //Text
             titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
 
             // Step 1
-			stepBox = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));
-            stepText = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
-            
+			step1Box = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(800));
+            step1Text = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
+			step1IconLight->Draw(hdc);
+
 			// Step 2
-            stepBox = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
-			stepText = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+            step2Box = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
+			step2Text = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+            step2IconDark->Draw(hdc);
 
             // Step 3
-			stepBox = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
-			stepText = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
+			step3Box = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
+			step3Text = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
+            step3IconDark->Draw(hdc);
 
             EndPaint(hWnd, &ps);
         }
