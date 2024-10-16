@@ -51,10 +51,10 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
 
 
 
-void ImageManager::paintImage(HDC hdc, HWND hwnd)
+void ImageManager::paintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
 {
     // Charger l'image PNG avec WIC
-    HBITMAP hBitmap = LoadPNGImage(filePath, hdc);
+    hBitmap = LoadPNGImage(filePath, hdc);
 
     if (hBitmap)
     {
@@ -69,10 +69,7 @@ void ImageManager::paintImage(HDC hdc, HWND hwnd)
         if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
         {
             // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
-            const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
-            TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
-
-            //MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
+            MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
         }
         else
         {
@@ -97,8 +94,24 @@ void ImageManager::paintImage(HDC hdc, HWND hwnd)
     else
     {
         // Affiche une erreur car l'image n'a pas pu être chargée
-        const wchar_t* errorMessage = L"Erreur: Impossible de charger l'image.";
-        TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
+        MessageBox(hwnd, L"Erreur: Impossible de charger l'image.", L"Erreur inconnue", MB_OK | MB_ICONERROR);
     }
+}
+
+bool ImageManager::IsPNGFile(LPCWSTR filePath)
+{
+    std::wstring path(filePath);
+    // Récupère l'extension du fichier déposé
+    size_t extPos = path.find_last_of(L".");
+    if (extPos == std::wstring::npos)
+        return false;  // Pas d'extension trouvée
+
+    // Vérifie si l'extension du fichier est bien "png"
+    std::wstring extension = path.substr(extPos + 1);
+    if (extension == L"png" || extension == L"PNG")
+    {
+        return true;
+    }
+    return false;
 }
 

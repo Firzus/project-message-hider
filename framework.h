@@ -8,8 +8,6 @@
 #define WIN32_LEAN_AND_MEAN             // Exclure les en-têtes Windows rarement utilisés
 // Fichiers d'en-tête Windows
 #include <windows.h>
-#include <wincodec.h>
-#pragma comment(lib, "windowscodecs.lib")
 // Fichiers d'en-tête C RunTime
 #include <stdlib.h>
 #include <malloc.h>
@@ -17,3 +15,9 @@
 #include <tchar.h>
 // Fichiers d'en-tête classes
 #include "ImageManager.h"
+// Bibliothèques supplémentaires
+#include <shobjidl.h>
+#include <shellapi.h>
+#include <wincodec.h>
+#pragma comment(lib, "windowscodecs.lib")
+#include <string>

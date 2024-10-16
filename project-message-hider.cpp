@@ -129,6 +129,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+
+    case WM_CREATE:
+        {
+            // Autorise le drag-and-drop dans la fenêtre
+            DragAcceptFiles(hWnd, TRUE);
+        }
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -146,18 +154,66 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
+    // Est appelé quand on glisse un fichier sur la fenêtre
+    case WM_DROPFILES:
+    {
+        HDROP hDrop = (HDROP)wParam;
+        wchar_t filePath[MAX_PATH];
+
+        // Récupère le chemin du premier fichier déposé
+        if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
+        {
+            // Si le fichier déposé n'est pas un fichier png, affiche un message d'erreur
+            if (!imageManager.IsPNGFile(filePath))
+            {
+                MessageBox(hWnd, L"Erreur : Seuls les fichiers PNG sont acceptes.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                DragFinish(hDrop);
+                break;
+            }
+
+            // Libérer la ressource précédente si une image était déjà chargée 
+            // (pour éviter des problèmes d'affichage non voulus)
+            if (imageManager.hBitmap)
+            {
+                DeleteObject(imageManager.hBitmap);
+                imageManager.hBitmap = NULL;
+            }
+
+            // Récupère le fenêtre actuelle
+            HDC hdc = GetDC(hWnd);
+
+            // Charge et affiche l'image dans la fenêtre
+            imageManager.paintImage(hdc, hWnd, filePath);
+
+            // Adapte les dimensions de la fenêtre aux dimensions de l'image
+            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
+        }
+
+        // Libérer les ressources du drag-and-drop
+        DragFinish(hDrop);
+    }
+    break;
+
+    // Dessine la fenêtre et son contenu
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            // Load et affiche l'image
-            imageManager.paintImage(hdc, hWnd);
-            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
+            if (imageManager.hBitmap)
+            {
+                // Afficher l'image
+                HDC hdcMem = CreateCompatibleDC(hdc);
+                SelectObject(hdcMem, imageManager.hBitmap);
+                BitBlt(hdc, 0, 0, imageManager.actualImageDimensions, imageManager.actualImageDimensions, hdcMem, 0, 0, SRCCOPY);
+                DeleteDC(hdcMem);
+            }
 
             EndPaint(hWnd, &ps);
         }
         break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
