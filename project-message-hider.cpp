@@ -57,6 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    srand(time(0));
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -76,6 +77,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECTMESSAGEHIDER));
 
     MSG msg;
+    HDC hdc = GetDC(NULL);
+    MessageManager messManager;
+    WCHAR currentDir[MAX_PATH];
+
+    GetCurrentDirectoryW(MAX_PATH, currentDir);
+    messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
