@@ -13,8 +13,6 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-// Fichiers d'en-tête classes
-#include "ImageManager.h"
 // Bibliothèques supplémentaires
 #include <shobjidl.h>
 #include <shellapi.h>

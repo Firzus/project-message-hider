@@ -13,7 +13,7 @@ private:
 	int dimensionLimit = 980;
 
 	// Position et taillede l'image dans la fenêtre
-	int posX = 500;
-	int posY = 200;
-	int squareSize = 300;
+	int posX = 1400;
+	int posY = 550;
+	int squareSize = 400;
 };

@@ -6,6 +6,8 @@
 
 #pragma comment(lib, "Shcore.lib")
 
+// Fichiers d'en-tête classes
+#include "ImageManager.h"
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
