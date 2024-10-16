@@ -2,13 +2,6 @@
 #include "project-message-hider.h"
 #include <string>
 
-#include <gdiplus.h>
-#include <iostream>
-
-#pragma comment(lib, "gdiplus.lib")
-
-using namespace Gdiplus;
-
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
@@ -60,19 +53,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Placez le code ici.
-    ULONG_PTR gdiplusToken;
-
-    void InitGDIPlus() {
-        GdiplusStartupInput gdiplusStartupInput;
-        GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
-    }
-
-    void ShutdownGDIPlus() {
-        GdiplusShutdown(gdiplusToken);
-    }
-
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -191,8 +171,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             //Text
             titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
-
-            // Steps
 
             // Step 1
 			stepBox = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));

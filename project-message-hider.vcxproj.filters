@@ -16,6 +16,9 @@
     <Filter Include="Fichiers de ressources\Fonts">
       <UniqueIdentifier>{bcc7433d-e877-401c-bf03-30a944db5aab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers de ressources\Icons">
+      <UniqueIdentifier>{250fee54-90e4-4f19-b6d0-da630d410019}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -83,6 +86,24 @@
     </Image>
     <Image Include="project-message-hider.ico">
       <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="resources\icons\input-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\input-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\output-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\output-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\set-icon-dark.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
+    </Image>
+    <Image Include="resources\icons\set-icon-light.png">
+      <Filter>Fichiers de ressources\Icons</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

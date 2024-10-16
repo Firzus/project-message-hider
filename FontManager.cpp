@@ -3,12 +3,12 @@
 FontManager::FontManager()
 {
     hFontTitlePath = L"resources/fonts/Inter-ExtraBold.ttf";
-    hFontSubtitlePath = L"resources/fonts/Inter-Medium.ttf";
-    hFontParagraphPath = L"resources/fonts/Inter-SemiBold.ttf";
+    hFontSubtitlePath = L"resources/fonts/Inter-SemiBold.ttf";
+    hFontParagraphPath = L"resources/fonts/Inter-Regular.ttf";
     hFontLeadPath = L"resources/fonts/Inter-Regular.ttf";
-    hFontLargePath = L"resources/fonts/Inter-Bold.ttf";
-    hFontSmallPath = L"resources/fonts/Inter-Light.ttf";
-    hFontMutedPath = L"resources/fonts/Inter-Thin.ttf";
+    hFontLargePath = L"resources/fonts/Inter-SemiBold.ttf";
+    hFontSmallPath = L"resources/fonts/Inter-Medium.ttf";
+    hFontMutedPath = L"resources/fonts/Inter-Regular.ttf";
 }
 FontManager::~FontManager() {}
 
