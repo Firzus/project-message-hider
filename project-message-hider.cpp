@@ -76,7 +76,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
     HDC hdc = GetDC(NULL);
     MessageManager messManager;
-    messManager.HideMessage(L"C:/Users/fifam/Pictures/Screenshots/game.png", "Super Secret messs", hdc);
+    WCHAR currentDir[MAX_PATH];
+
+    GetCurrentDirectoryW(MAX_PATH, currentDir);
+    messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
     OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
 
     // Boucle de messages principale :
