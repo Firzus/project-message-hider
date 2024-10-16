@@ -18,7 +18,6 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -180,14 +179,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 imageManager.hBitmap = NULL;
             }
 
-            // Récupère le fenêtre actuelle
+            // Récupère la fenêtre actuelle
             HDC hdc = GetDC(hWnd);
 
             // Charge et affiche l'image dans la fenêtre
             imageManager.paintImage(hdc, hWnd, filePath);
-
-            // Adapte les dimensions de la fenêtre aux dimensions de l'image
-            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
+            ReleaseDC(hWnd, hdc);
         }
 
         // Libérer les ressources du drag-and-drop
@@ -200,16 +197,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-
-            if (imageManager.hBitmap)
-            {
-                // Afficher l'image
-                HDC hdcMem = CreateCompatibleDC(hdc);
-                SelectObject(hdcMem, imageManager.hBitmap);
-                BitBlt(hdc, 0, 0, imageManager.actualImageDimensions, imageManager.actualImageDimensions, hdcMem, 0, 0, SRCCOPY);
-                DeleteDC(hdcMem);
-            }
-
             EndPaint(hWnd, &ps);
         }
         break;
@@ -241,20 +228,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
-}
-
-void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight)
-{
-    // Récupérer la taille de la fenêtre et du client
-    RECT rcClient, rcWindow;
-    GetClientRect(hwnd, &rcClient);
-    GetWindowRect(hwnd, &rcWindow);
-
-    // Calculer la taille de la bordure de la fenêtre
-    int borderWidth = (rcWindow.right - rcWindow.left) - rcClient.right;
-    int borderHeight = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
-
-
-    // Ajuster la taille de la fenêtre en fonction de l'image
-    SetWindowPos(hwnd, nullptr, 0, 0, imageWidth + borderWidth, imageHeight + borderHeight, SWP_NOMOVE | SWP_NOZORDER);
 }

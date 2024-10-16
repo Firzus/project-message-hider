@@ -73,20 +73,12 @@ void ImageManager::paintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
         }
         else
         {
-            // On transforme l'image en ratio 1:1 
-            // On récupère le côté le plus petit
-            UINT minDimension = min(bitmap.bmWidth, bitmap.bmHeight);
+            // Calcul des dimensions à afficher (réduit ou agrandit l'image pour qu'elle tienne dans le carré)
+            int srcWidth = (bitmap.bmWidth > squareSize) ? squareSize : bitmap.bmWidth;
+            int srcHeight = (bitmap.bmHeight > squareSize) ? squareSize : bitmap.bmHeight;
 
-            // On crée un offset en fonction du côté le plus grand
-            // pour centrer l'image
-            UINT xOffset = (bitmap.bmWidth > minDimension) ? (bitmap.bmWidth - minDimension) / 2 : 0;
-            UINT yOffset = (bitmap.bmHeight > minDimension) ? (bitmap.bmHeight - minDimension) / 2 : 0;
-
-            // On stocke la taille de l'image finale
-            actualImageDimensions = minDimension;
-
-            // Fonction pour dessiner l'image
-            BitBlt(hdc, 0, 0, minDimension, minDimension, hdcMem, xOffset, yOffset, SRCCOPY);
+            // Affiche l'image dans le carré
+            StretchBlt(hdc, posX, posY, squareSize, squareSize, hdcMem, 0, 0, srcWidth, srcHeight, SRCCOPY);
         }
 
         DeleteDC(hdcMem);
