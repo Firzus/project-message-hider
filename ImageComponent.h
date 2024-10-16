@@ -15,7 +15,7 @@ public:
     void Draw(HDC hdc);
     void SetImage(const std::wstring& imagePath);
 
-    bool IsPNGFile(LPCWSTR filePath);
+    bool IsValidFile(LPCWSTR filePath);
     void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
     HBITMAP hBitmap;
 

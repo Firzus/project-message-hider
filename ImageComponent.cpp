@@ -67,7 +67,7 @@ HBITMAP ImageComponent::LoadPNGImage(LPCWSTR filePath)
     return hBitmap;
 }
 
-bool ImageComponent::IsPNGFile(LPCWSTR filePath)
+bool ImageComponent::IsValidFile(LPCWSTR filePath)
 {
     // Récupère l'extension du fichier déposé
     std::wstring path(filePath);
@@ -78,8 +78,11 @@ bool ImageComponent::IsPNGFile(LPCWSTR filePath)
 
     std::wstring extension = path.substr(extPos + 1);
 
-    // Vérifie si l'extension du fichier est bien "png"
-    return (extension == L"png" || extension == L"PNG");
+    // Vérifie si l'extension du fichier 
+    // est bien une extension valide (png, jpg, jpeg)
+    return (extension == L"png" || extension == L"PNG"
+        || extension == L"jpg" || extension == L"JPG" 
+        || extension == L"jpeg" || extension == L"JPEG");
 }
 
 void ImageComponent::PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)

@@ -234,14 +234,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
         {
             ImageComponent uploadedImage;
-
-            // Si le fichier déposé n'est pas un fichier png, affiche un message d'erreur
-            if (!uploadedImage.IsPNGFile(filePath))
+            
+            // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
+            if (!uploadedImage.IsValidFile(filePath))
             {
-                MessageBox(hWnd, L"Erreur : Seuls les fichiers PNG sont acceptes.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
                 DragFinish(hDrop);
                 break;
             }
+            
 
             // Libérer la ressource précédente si une image était déjà chargée 
             // (pour éviter des problèmes d'affichage non voulus)
