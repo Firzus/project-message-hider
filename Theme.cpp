@@ -28,8 +28,8 @@ COLORREF Theme::GetColor(int index) {
         return colorPalette[index];
     }
     else {
-        // Retourner une valeur par défaut (ex: noir) si l'index n'existe pas
-        return RGB(0, 0, 0);
+        // Retourner une valeur par défaut (rouge) si l'index n'existe pas
+        return RGB(255, 10, 10);
     }
 }
 

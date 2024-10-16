@@ -5,6 +5,8 @@
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
+#include "TextComponent.h"
+#include "BoxComponent.h"
 
 #define MAX_LOADSTRING 100
 
@@ -29,6 +31,8 @@ static Button* btnSecondary;
 static Button* btnSubmit;
 static Button* btnDownload;
 static Button* btnReset;
+
+static BoxComponent* step1Box;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -79,12 +83,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJECTMESSAGEHIDER));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDC_MYICON));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PROJECTMESSAGEHIDER);
     wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDC_MYICON));
 
     return RegisterClassExW(&wcex);
 }
@@ -93,15 +97,26 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Stocke le handle d'instance dans la variable globale
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(
+       szWindowClass,        // Nom de la classe de fenêtre
+       L"PixHide",              // Titre de la fenêtre
+       WS_OVERLAPPEDWINDOW,  // Style de la fenêtre classique
+       CW_USEDEFAULT,        // Position X
+       CW_USEDEFAULT,        // Position Y
+       1280,                 // Largeur par défaut
+       720,                  // Hauteur par défaut
+       nullptr,              // Pas de fenêtre parent
+       nullptr,              // Pas de menu
+       hInstance,            // Instance de l'application
+       nullptr               // Paramètres supplémentaires
+   );
 
    if (!hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
+   ShowWindow(hWnd, SW_SHOWMAXIMIZED);
    UpdateWindow(hWnd);
 
    return TRUE;
@@ -117,11 +132,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         {
 		    fontManager.LoadFont(hWnd);
-
-            // Créer deux boutons avec des styles différents
-            btnPrimary = new Button(hWnd, 50, 50, 150, 50, 101, true);   // Style primaire
-            btnSecondary = new Button(hWnd, 50, 120, 150, 50, 102, false); // Style secondaire
-         }
+        }
         break;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
@@ -136,27 +147,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);;
+            HDC hdc = BeginPaint(hWnd, &ps);
 
-            btnPrimary->Draw(hdc);
-            btnSecondary->Draw(hdc);
-
-            //MessageBox(hWnd, L"Appel", L"Appel", MB_OK);
-
-            COLORREF backgroundColor = theme.GetColor(950);
-
-            // Créer une brosse avec la couleur
-            HBRUSH hBrush = CreateSolidBrush(backgroundColor);
-
-            //// Obtenir la zone entière de la fenêtre (client area)
+            // Utils
             RECT rect;
+
+			// Background color
+            COLORREF backgroundColor = theme.GetColor(50);
+            HBRUSH hBrush = CreateSolidBrush(backgroundColor);
             GetClientRect(hWnd, &rect);
-
-            //// Remplir le fond de la fenêtre avec la couleur
             FillRect(hdc, &rect, hBrush);
-
-            //// Nettoyer la brosse
             DeleteObject(hBrush);
+
+            //Text
+            TextComponent titleText(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, fontManager.GetFontTitle(), theme.GetColor(950), 916);
+
+            // Steps
+			step1Box = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));
 
             EndPaint(hWnd, &ps);
         }
