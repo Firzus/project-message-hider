@@ -12,7 +12,7 @@
 #include "ImageManager.h"
 #include "FontManager.h"
 #include "Theme.h"
-#include "Button.h"
+#include "ButtonComponent.h"
 #include "TextComponent.h"
 #include "BoxComponent.h"
 #include "ImageComponent.h"
@@ -59,13 +59,13 @@ static TextComponent* titleText;
 // TODO : TO REMOVE, TEST ONLY
 std::wstring counterTextContent = L"1 of 3";
 
-static Button* btnPrimary;
-static Button* btnSecondary;
+static ButtonComponent* btnTest;
+static const int BUTTON_WIDTH = 100;
+static const int BUTTON_HEIGHT = 40;
+static const int BUTTON_X = 10;
+static const int BUTTON_Y = 10;
 
 // Buttons
-static Button* btnSubmit;
-static Button* btnDownload;
-static Button* btnReset;
 
 // Step 1
 static BoxComponent* step1Box;
@@ -85,6 +85,19 @@ static TextComponent* step3Text;
 static ImageComponent* step3IconLight;
 static ImageComponent* step3IconDark;
 
+static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar_t* text) {
+    // Dessiner le bouton
+    HBRUSH hBrush = CreateSolidBrush(RGB(200, 200, 200)); // Couleur de remplissage
+    RECT rect = { x, y, x + width, y + height };
+    FillRect(hdc, &rect, hBrush);
+    DeleteObject(hBrush);
+
+    // Dessiner le texte
+    SetTextColor(hdc, RGB(0, 0, 0)); // Couleur du texte
+    SetBkMode(hdc, TRANSPARENT);
+    DrawText(hdc, text, -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -102,7 +115,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
 	step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
-
 
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
@@ -209,17 +221,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    fontManager.LoadFont(hWnd);
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
+
+            btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1);
         }
         break;
 
 
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
-        case 101:
-            btnPrimary->OnClick();
-            break;
-        case 102:
-            btnSecondary->OnClick();
+        default :
             break;
         }
         break;
@@ -259,9 +269,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         // Libérer les ressources du drag-and-drop
         DragFinish(hDrop);
-    }
-    break;
-
+    } break;
+    case WM_LBUTTONDOWN: {
+        // Vérifier si le clic est à l'intérieur du bouton
+        if (btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
+            btnTest->OnClick();
+        }
+    } break;
     // Dessine la fenêtre et son contenu
     case WM_PAINT:
         {
@@ -279,7 +293,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBrush);
 
             // Counter
-
             counter1Box = new BoxComponent(hdc, 48, 48, 48, 8, theme.GetColor(900));
             counter2Box = new BoxComponent(hdc, 100, 48, 48, 8, theme.GetColor(300));
             counter3Box = new BoxComponent(hdc, 152, 48, 48, 8, theme.GetColor(300));
@@ -302,6 +315,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			step3Box = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
 			step3Text = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
             step3IconDark->Draw(hdc);
+
+            // Buttons
+            btnTest->Draw(hdc, theme.GetColor(900), theme.GetColor(50));
 
             EndPaint(hWnd, &ps);
         }
