@@ -18,25 +18,57 @@ bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::strin
     }
     
     if (!SaveBitmapAsPng(hBitmap, L"EncryptedImg.png", hdc)) {
-        OutputDebugStringA("Error while saving image.");
+        OutputDebugStringA("Error while saving image.\n");
         return false;
     }
-    OutputDebugStringA("Saved to EncryptedImg.png");
+    OutputDebugStringA("Saved to EncryptedImg.png\n");
     DeleteObject(hBitmap);
     return true;
 }
 
-std::string MessageManager::GetMessage(const std::wstring& ImagePath)
+std::string MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
 {
-    return std::string();
+    HBITMAP hBitmap = GetBitMapFromPng(ImagePath.c_str(), hdc);
+    BITMAP bmp;
+    std::vector<int> messageBits;
+    BYTE* pixels;
+    int bitsPerPixel = 0;
+    std::string embededMessage = "";
+
+    if (!hBitmap) {
+        OutputDebugStringA("Error while loading image\n");
+        return "";
+    }
+    GetObject(hBitmap, sizeof(BITMAP), &bmp);
+    if (bmp.bmBitsPixel != 24 && bmp.bmBitsPixel != 32) {
+        OutputDebugStringA("Pixel size not valid use 24 or 32 pixel size\n");
+        return "";
+    }
+    pixels = (BYTE*)bmp.bmBits;
+    bitsPerPixel = bmp.bmBitsPixel / 8;
+
+    for (int y = 0; y < bmp.bmHeight; ++y) {
+        for (int x = 0; x < bmp.bmWidth; ++x) {
+            int pixelIndex = (y * bmp.bmWidthBytes) + (x * bitsPerPixel);
+            int blue = pixels[pixelIndex]; //(BGR)
+            messageBits.push_back(blue & 1);
+            if (messageBits.size() >= 8 && messageBits.size() % 8 == 0) {
+                char ch = GetCharFromByte(messageBits, messageBits.size() - 8);
+                embededMessage += ch;
+                if (ch == '\0')
+                    return embededMessage;
+            }
+        }
+    }
 }
 
 std::vector<int> MessageManager::ConvertStringToBits(const std::string& Message)
 {
     std::vector<int> messageBits;
-    for (int i = 0; i < Message.size(); i++)
-        for (int i = 0; i < 8; ++i)
-            messageBits.push_back((Message[i] >> i) & 1);
+    std::string mess = Message + '\0';
+    for (int i = 0; i < mess.size(); i++)
+        for (int j = 0; j < 8; j++)
+            messageBits.push_back((mess[i] >> j) & 1);
             // extracts the i-th bit from mess[i] and adds it to the messageBits list
     return messageBits;
 }
@@ -50,8 +82,7 @@ bool MessageManager::SaveMessage(HBITMAP HBitmap, BITMAP& Bmp, const std::vector
 
     // check pixels size
     if (Bmp.bmBitsPixel != 24 && Bmp.bmBitsPixel != 32) {
-        std::string a = "Pixel size not valid use 24 or 32 pixel size" + std::to_string(Bmp.bmBitsPixel);
-        OutputDebugStringA(a.c_str());
+        OutputDebugStringA("Pixel size not valid use 24 or 32 pixel size");
         return false;
     }
 
@@ -65,11 +96,9 @@ bool MessageManager::SaveMessage(HBITMAP HBitmap, BITMAP& Bmp, const std::vector
             if (lsb != MessageBits[bitIndex]) {
                 blue += (rand() % 2 == 0) ? 1 : -1; // increase or decrease pixel value
                 blue = (blue < 0) ? 0 : (blue > 255) ? 255 : blue;
-                pixels[pixelIndex] = blue; // Appliquer la nouvelle valeur
+                pixels[pixelIndex] = blue;
             }
             bitIndex++;
-            if (bytesPerPixel == 4)
-                pixelIndex++;
         }
     }
     return true;
@@ -179,5 +208,15 @@ bool MessageManager::SaveBitmapAsPng(HBITMAP hBitmap, const std::wstring& output
     pEncoder->Release();
     pFactory->Release();
     return true;
+}
+
+char MessageManager::GetCharFromByte(const std::vector<int>& BitsMap, int Index)
+{
+    char ch = '\0';
+    for (int i = 0; i < 8 && Index + i < BitsMap.size(); i++) {
+        // != add the shifted bit to ch bit by bit
+        ch |= (BitsMap[Index + i] << i);  // get the BitsMap[Index + i] bit and shif it of i pos by left
+    }
+    return ch;
 }
 

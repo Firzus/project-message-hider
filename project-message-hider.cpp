@@ -46,7 +46,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
     HDC hdc = GetDC(NULL);
     MessageManager messManager;
-    messManager.HideMessage(L"C:/Users/fifam/Pictures/Screenshots/game.png", "Hello fran", hdc);
+    messManager.HideMessage(L"C:/Users/fifam/Pictures/Screenshots/game.png", "Super Secret messs", hdc);
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
