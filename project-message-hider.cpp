@@ -1,10 +1,26 @@
-// project-message-hider.cpp : Définit le point d'entrée de l'application.
-//
-
 #include "framework.h"
 #include "project-message-hider.h"
+#include <string>
+
+#include <shellscalingapi.h>
+
+#pragma comment(lib, "Shcore.lib")
+
+#include "FontManager.h"
+#include "Theme.h"
+#include "Button.h"
+#include "TextComponent.h"
+#include "BoxComponent.h"
 
 #define MAX_LOADSTRING 100
+
+// Ressources
+#define ICON_INPUT_LIGHT "ressources\\icons\\input-icon-light.png"
+#define ICON_INPUT_DARK "ressources\\icons\\input-icon-dark.png"
+#define ICON_OUTPUT_LIGHT "ressources\\icons\\output-icon-light.png"
+#define ICON_OUTPUT_DARK "ressources\\icons\\output-icon-dark.png"
+#define ICON_SET_LIGHT "ressources\\icons\\set-icon-light.png"
+#define ICON_SET_DARK "ressources\\icons\\set-icon-dark.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -17,7 +33,21 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight);
+// Déclaration de classes
+FontManager fontManager;
+Theme theme;
+
+static TextComponent* titleText;
+
+static Button* btnPrimary;
+static Button* btnSecondary;
+
+static Button* btnSubmit;
+static Button* btnDownload;
+static Button* btnReset;
+
+static BoxComponent* stepBox;
+static TextComponent* stepText;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -28,7 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Placez le code ici.
+    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -62,13 +92,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
-//
-//  FONCTION : MyRegisterClass()
-//
-//  OBJECTIF : Inscrit la classe de fenêtre.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -80,74 +103,65 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJECTMESSAGEHIDER));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDC_MYICON));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PROJECTMESSAGEHIDER);
     wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDC_MYICON));
 
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FONCTION : InitInstance(HINSTANCE, int)
-//
-//   OBJECTIF : enregistre le handle d'instance et crée une fenêtre principale
-//
-//   COMMENTAIRES :
-//
-//        Dans cette fonction, nous enregistrons le handle de l'instance dans une variable globale, puis
-//        nous créons et affichons la fenêtre principale du programme.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Stocke le handle d'instance dans la variable globale
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, 
-       WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(
+       szWindowClass,        // Nom de la classe de fenêtre
+       L"PixHide",              // Titre de la fenêtre
+       WS_OVERLAPPEDWINDOW,  // Style de la fenêtre classique
+       CW_USEDEFAULT,        // Position X
+       CW_USEDEFAULT,        // Position Y
+       1280,                 // Largeur par défaut
+       720,                  // Hauteur par défaut
+       nullptr,              // Pas de fenêtre parent
+       nullptr,              // Pas de menu
+       hInstance,            // Instance de l'application
+       nullptr               // Paramètres supplémentaires
+   );
 
    if (!hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
+   ShowWindow(hWnd, SW_SHOWMAXIMIZED);
    UpdateWindow(hWnd);
 
    return TRUE;
 }
 
-//
-//  FONCTION : WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  OBJECTIF : Traite les messages pour la fenêtre principale.
-//
-//  WM_COMMAND  - traite le menu de l'application
-//  WM_PAINT    - Dessine la fenêtre principale
-//  WM_DESTROY  - génère un message d'arrêt et retourne
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static HFONT hFontTitle, hFontSubtitle, hFontParagraph, hFontLead, hFontLarge, hFontSmall, hFontMuted;
+    static DWORD fontCountTitle = 0, fontCountSubtitle = 0, fontCountParagraph = 0, fontCountLead = 0, fontCountLarge = 0, fontCountSmall = 0, fontCountMuted = 0;
+
     switch (message)
     {
-    case WM_COMMAND:
+    case WM_CREATE:
         {
-            int wmId = LOWORD(wParam);
-            // Analyse les sélections de menu :
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+		    fontManager.LoadFont(hWnd);
+        }
+        break;
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case 101:
+            btnPrimary->OnClick();
+            break;
+        case 102:
+            btnSecondary->OnClick();
+            break;
         }
         break;
     case WM_PAINT:
@@ -155,10 +169,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            // Load et affiche l'image
-            ImageManager imageManager;
-            imageManager.paintImage(hdc);
-            AdjustWindowSize(hWnd, imageManager.actualImageDimensions, imageManager.actualImageDimensions);
+            // Utils
+            RECT rect;
+
+			// Background color
+            COLORREF backgroundColor = theme.GetColor(50);
+            HBRUSH hBrush = CreateSolidBrush(backgroundColor);
+            GetClientRect(hWnd, &rect);
+            FillRect(hdc, &rect, hBrush);
+            DeleteObject(hBrush);
+
+            //Text
+            titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
+
+            // Step 1
+			stepBox = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));
+            stepText = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
+            
+			// Step 2
+            stepBox = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
+			stepText = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+
+            // Step 3
+			stepBox = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
+			stepText = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
 
             EndPaint(hWnd, &ps);
         }
