@@ -48,7 +48,10 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
     return hTempBitmap;
 }
 
-void ImageManager::paintImage(HDC hdc)
+
+
+
+void ImageManager::paintImage(HDC hdc, HWND hwnd)
 {
     // Charger l'image PNG avec WIC
     HBITMAP hBitmap = LoadPNGImage(filePath, hdc);
@@ -68,6 +71,8 @@ void ImageManager::paintImage(HDC hdc)
             // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
             const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
             TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
+
+            //MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
         }
         else
         {
@@ -88,7 +93,6 @@ void ImageManager::paintImage(HDC hdc)
         }
 
         DeleteDC(hdcMem);
-        DeleteObject(hBitmap);
     }
     else
     {
@@ -97,3 +101,4 @@ void ImageManager::paintImage(HDC hdc)
         TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
     }
 }
+
