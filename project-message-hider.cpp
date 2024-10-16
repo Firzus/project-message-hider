@@ -9,7 +9,6 @@
 #pragma comment (lib, "gdiplus.lib")
 
 // Fichiers d'en-tête classes
-#include "ImageManager.h"
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
@@ -33,7 +32,6 @@ ULONG_PTR gdiplusToken;
 HINSTANCE hInst;                                // instance actuelle
 WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
 WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
-ImageManager imageManager;
 
 // Déclarations anticipées des fonctions incluses dans ce module de code :
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -233,8 +231,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Récupère le chemin du premier fichier déposé
         if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
         {
+            ImageComponent uploadedImage;
+
             // Si le fichier déposé n'est pas un fichier png, affiche un message d'erreur
-            if (!imageManager.IsPNGFile(filePath))
+            if (!uploadedImage.IsPNGFile(filePath))
             {
                 MessageBox(hWnd, L"Erreur : Seuls les fichiers PNG sont acceptes.", L"Erreur de format", MB_OK | MB_ICONERROR);
                 DragFinish(hDrop);
@@ -243,17 +243,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // Libérer la ressource précédente si une image était déjà chargée 
             // (pour éviter des problèmes d'affichage non voulus)
-            if (imageManager.hBitmap)
+            if (uploadedImage.hBitmap)
             {
-                DeleteObject(imageManager.hBitmap);
-                imageManager.hBitmap = NULL;
+                DeleteObject(uploadedImage.hBitmap);
+                uploadedImage.hBitmap = NULL;
             }
 
             // Récupère la fenêtre actuelle
             HDC hdc = GetDC(hWnd);
 
             // Charge et affiche l'image dans la fenêtre
-            imageManager.paintImage(hdc, hWnd, filePath);
+            uploadedImage.PaintImage(hdc, hWnd, filePath);
             ReleaseDC(hWnd, hdc);
         }
 
