@@ -1,6 +1,7 @@
 #include "TextComponent.h"
 
-TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int posY, HFONT font, COLORREF textColor, int frameWidth)
+TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int posY, int frameWidth,HFONT font, COLORREF textColor)
+	: text(text), posX(posX), posY(posY), textColor(textColor), frameWidth(frameWidth)
 {
     // Sélectionner la police dans le contexte de périphérique
     HFONT oldFont = (HFONT)SelectObject(hdc, font);
@@ -25,3 +26,9 @@ TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int po
 }
 
 TextComponent::~TextComponent() {}
+
+void TextComponent::SetColor(HWND hWnd, COLORREF newColor)
+{
+	textColor = newColor;
+	InvalidateRect(hWnd, nullptr, TRUE);
+}

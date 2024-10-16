@@ -5,9 +5,14 @@
 
 class TextComponent
 {
-public:
+	int posX, posY; // Position du texte
+	const std::wstring& text;
+	COLORREF textColor; // Couleur du texte
+	int frameWidth; // Largeur du cadre
 
-	TextComponent(HDC hdc, const std::wstring& text, int posX, int posY, HFONT font, COLORREF textColor, int frameWidth);
-	~TextComponent();	
+public:
+	TextComponent(HDC hdc, const std::wstring& text, int posX, int posY, int frameWidth, HFONT font, COLORREF textColor);
+	~TextComponent();
+	void SetColor(HWND hWnd, COLORREF newColor);
 };
 

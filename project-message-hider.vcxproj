@@ -158,6 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="project-message-hider.ico" />
+    <Image Include="resources\icons\input-icon-dark.png" />
+    <Image Include="resources\icons\input-icon-light.png" />
+    <Image Include="resources\icons\output-icon-dark.png" />
+    <Image Include="resources\icons\output-icon-light.png" />
+    <Image Include="resources\icons\set-icon-dark.png" />
+    <Image Include="resources\icons\set-icon-light.png" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

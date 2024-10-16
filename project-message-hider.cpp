@@ -2,6 +2,13 @@
 #include "project-message-hider.h"
 #include <string>
 
+#include <gdiplus.h>
+#include <iostream>
+
+#pragma comment(lib, "gdiplus.lib")
+
+using namespace Gdiplus;
+
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
@@ -9,6 +16,14 @@
 #include "BoxComponent.h"
 
 #define MAX_LOADSTRING 100
+
+// Ressources
+#define ICON_INPUT_LIGHT "ressources\\icons\\input-icon-light.png"
+#define ICON_INPUT_DARK "ressources\\icons\\input-icon-dark.png"
+#define ICON_OUTPUT_LIGHT "ressources\\icons\\output-icon-light.png"
+#define ICON_OUTPUT_DARK "ressources\\icons\\output-icon-dark.png"
+#define ICON_SET_LIGHT "ressources\\icons\\set-icon-light.png"
+#define ICON_SET_DARK "ressources\\icons\\set-icon-dark.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -25,6 +40,8 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 FontManager fontManager;
 Theme theme;
 
+static TextComponent* titleText;
+
 static Button* btnPrimary;
 static Button* btnSecondary;
 
@@ -32,7 +49,9 @@ static Button* btnSubmit;
 static Button* btnDownload;
 static Button* btnReset;
 
-static BoxComponent* step1Box;
+
+static BoxComponent* stepBox;
+static TextComponent* stepText;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -43,6 +62,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Placez le code ici.
+    ULONG_PTR gdiplusToken;
+
+    void InitGDIPlus() {
+        GdiplusStartupInput gdiplusStartupInput;
+        GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+    }
+
+    void ShutdownGDIPlus() {
+        GdiplusShutdown(gdiplusToken);
+    }
+
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -160,10 +190,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBrush);
 
             //Text
-            TextComponent titleText(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, fontManager.GetFontTitle(), theme.GetColor(950), 916);
+            titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
 
             // Steps
-			step1Box = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));
+
+            // Step 1
+			stepBox = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(900));
+            stepText = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
+            
+			// Step 2
+            stepBox = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
+			stepText = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+
+            // Step 3
+			stepBox = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
+			stepText = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
 
             EndPaint(hWnd, &ps);
         }
