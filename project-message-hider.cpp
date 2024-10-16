@@ -74,10 +74,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECTMESSAGEHIDER));
 
     MSG msg;
-    HDC hdc = GetDC(NULL);
+    /*HDC hdc = GetDC(NULL);
     MessageManager messManager;
     messManager.HideMessage(L"C:/Users/fifam/Pictures/Screenshots/game.png", "Super Secret messs", hdc);
-    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());*/
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
