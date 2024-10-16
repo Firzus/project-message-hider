@@ -9,7 +9,6 @@
 #pragma comment (lib, "gdiplus.lib")
 
 // Fichiers d'en-tête classes
-#include "ImageManager.h"
 #include "FontManager.h"
 #include "Theme.h"
 #include "ButtonComponent.h"
@@ -33,7 +32,8 @@ ULONG_PTR gdiplusToken;
 HINSTANCE hInst;                                // instance actuelle
 WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
 WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
-ImageManager imageManager;
+
+MessageManager messManager;
 
 // Déclarations anticipées des fonctions incluses dans ce module de code :
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -137,12 +137,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
     HDC hdc = GetDC(NULL);
-    MessageManager messManager;
-    WCHAR currentDir[MAX_PATH];
+    /*MessageManager messManager;
+    //WCHAR currentDir[MAX_PATH];
 
-    GetCurrentDirectoryW(MAX_PATH, currentDir);
+    //GetCurrentDirectoryW(MAX_PATH, currentDir);
     messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
-    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());*/
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -243,27 +243,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Récupère le chemin du premier fichier déposé
         if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
         {
-            // Si le fichier déposé n'est pas un fichier png, affiche un message d'erreur
-            if (!imageManager.IsPNGFile(filePath))
+            ImageComponent uploadedImage;
+            
+            // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
+            if (!uploadedImage.IsValidFile(filePath))
             {
-                MessageBox(hWnd, L"Erreur : Seuls les fichiers PNG sont acceptes.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
                 DragFinish(hDrop);
                 break;
             }
+            
 
             // Libérer la ressource précédente si une image était déjà chargée 
             // (pour éviter des problèmes d'affichage non voulus)
-            if (imageManager.hBitmap)
+            if (uploadedImage.hBitmap)
             {
-                DeleteObject(imageManager.hBitmap);
-                imageManager.hBitmap = NULL;
+                DeleteObject(uploadedImage.hBitmap);
+                uploadedImage.hBitmap = NULL;
             }
 
             // Récupère la fenêtre actuelle
             HDC hdc = GetDC(hWnd);
 
             // Charge et affiche l'image dans la fenêtre
-            imageManager.paintImage(hdc, hWnd, filePath);
+            uploadedImage.PaintImage(hdc, hWnd, filePath);
+            std::wstring path(filePath);
+            std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+            if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+            OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
             ReleaseDC(hWnd, hdc);
         }
 

@@ -138,7 +138,6 @@
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ImageComponent.h" />
-    <ClInclude Include="ImageManager.h" />
     <ClInclude Include="MessageManager.h" />
     <ClInclude Include="project-message-hider.h" />
     <ClInclude Include="Resource.h" />
@@ -151,7 +150,6 @@
     <ClCompile Include="ButtonComponent.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="ImageComponent.cpp" />
-    <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="MessageManager.cpp" />
     <ClCompile Include="project-message-hider.cpp" />
     <ClCompile Include="TextComponent.cpp" />
