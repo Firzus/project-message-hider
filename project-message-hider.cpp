@@ -87,6 +87,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    srand(time(0));
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -120,6 +121,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECTMESSAGEHIDER));
 
     MSG msg;
+    HDC hdc = GetDC(NULL);
+    MessageManager messManager;
+    WCHAR currentDir[MAX_PATH];
+
+    GetCurrentDirectoryW(MAX_PATH, currentDir);
+    messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -278,4 +286,20 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight)
+{
+    // Récupérer la taille de la fenêtre et du client
+    RECT rcClient, rcWindow;
+    GetClientRect(hwnd, &rcClient);
+    GetWindowRect(hwnd, &rcWindow);
+
+    // Calculer la taille de la bordure de la fenêtre
+    int borderWidth = (rcWindow.right - rcWindow.left) - rcClient.right;
+    int borderHeight = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
+
+
+    // Ajuster la taille de la fenêtre en fonction de l'image
+    SetWindowPos(hwnd, nullptr, 0, 0, imageWidth + borderWidth, imageHeight + borderHeight, SWP_NOMOVE | SWP_NOZORDER);
 }
