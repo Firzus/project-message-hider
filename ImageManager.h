@@ -4,11 +4,16 @@
 class ImageManager
 {
 public:
-	void paintImage(HDC hdc);
-	UINT actualImageDimensions = 400;
+	void paintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
+	bool IsPNGFile(LPCWSTR filePath);
+	HBITMAP hBitmap;
 
 private:
 	HBITMAP LoadPNGImage(LPCWSTR filePath, HDC hdc);
-	int dimensionLimit = 1200;
-	LPCWSTR filePath = L"C:/Users/theob/OneDrive/Bureau/GTech 4 - Projet 2/Images/Paysage.png";
+	int dimensionLimit = 980;
+
+	// Position et taillede l'image dans la fenêtre
+	int posX = 1400;
+	int posY = 550;
+	int squareSize = 400;
 };

@@ -8,6 +8,8 @@
 #include <gdiplus.h>
 #pragma comment (lib, "gdiplus.lib")
 
+// Fichiers d'en-tête classes
+#include "ImageManager.h"
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
@@ -31,6 +33,7 @@ ULONG_PTR gdiplusToken;
 HINSTANCE hInst;                                // instance actuelle
 WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
 WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
+ImageManager imageManager;
 
 // Déclarations anticipées des fonctions incluses dans ce module de code :
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -204,8 +207,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         {
 		    fontManager.LoadFont(hWnd);
+            // Autorise le drag-and-drop dans la fenêtre
+            DragAcceptFiles(hWnd, TRUE);
         }
         break;
+
+
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case 101:
@@ -216,6 +223,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+
+    // Est appelé quand on glisse un fichier sur la fenêtre
+    case WM_DROPFILES:
+    {
+        HDROP hDrop = (HDROP)wParam;
+        wchar_t filePath[MAX_PATH];
+
+        // Récupère le chemin du premier fichier déposé
+        if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
+        {
+            // Si le fichier déposé n'est pas un fichier png, affiche un message d'erreur
+            if (!imageManager.IsPNGFile(filePath))
+            {
+                MessageBox(hWnd, L"Erreur : Seuls les fichiers PNG sont acceptes.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                DragFinish(hDrop);
+                break;
+            }
+
+            // Libérer la ressource précédente si une image était déjà chargée 
+            // (pour éviter des problèmes d'affichage non voulus)
+            if (imageManager.hBitmap)
+            {
+                DeleteObject(imageManager.hBitmap);
+                imageManager.hBitmap = NULL;
+            }
+
+            // Récupère la fenêtre actuelle
+            HDC hdc = GetDC(hWnd);
+
+            // Charge et affiche l'image dans la fenêtre
+            imageManager.paintImage(hdc, hWnd, filePath);
+            ReleaseDC(hWnd, hdc);
+        }
+
+        // Libérer les ressources du drag-and-drop
+        DragFinish(hDrop);
+    }
+    break;
+
+    // Dessine la fenêtre et son contenu
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
@@ -259,6 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EndPaint(hWnd, &ps);
         }
         break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -286,20 +334,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
-}
-
-void AdjustWindowSize(HWND hwnd, UINT imageWidth, UINT imageHeight)
-{
-    // Récupérer la taille de la fenêtre et du client
-    RECT rcClient, rcWindow;
-    GetClientRect(hwnd, &rcClient);
-    GetWindowRect(hwnd, &rcWindow);
-
-    // Calculer la taille de la bordure de la fenêtre
-    int borderWidth = (rcWindow.right - rcWindow.left) - rcClient.right;
-    int borderHeight = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
-
-
-    // Ajuster la taille de la fenêtre en fonction de l'image
-    SetWindowPos(hwnd, nullptr, 0, 0, imageWidth + borderWidth, imageHeight + borderHeight, SWP_NOMOVE | SWP_NOZORDER);
 }

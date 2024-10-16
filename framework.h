@@ -30,3 +30,5 @@
 // Fichiers d'en-tête classes
 #include "ImageManager.h"
 #include "MessageManager.h"
+// Bibliothèques supplémentaires
+#include <shellapi.h>

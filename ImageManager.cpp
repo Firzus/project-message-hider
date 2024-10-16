@@ -48,10 +48,13 @@ HBITMAP ImageManager::LoadPNGImage(LPCWSTR filePath, HDC hdc)
     return hTempBitmap;
 }
 
-void ImageManager::paintImage(HDC hdc)
+
+
+
+void ImageManager::paintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
 {
     // Charger l'image PNG avec WIC
-    HBITMAP hBitmap = LoadPNGImage(filePath, hdc);
+    hBitmap = LoadPNGImage(filePath, hdc);
 
     if (hBitmap)
     {
@@ -66,34 +69,41 @@ void ImageManager::paintImage(HDC hdc)
         if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
         {
             // Affiche une erreur car l'image a des dimensions au-dessus des dimensions fixées
-            const wchar_t* errorMessage = L"Erreur: L'image est trop grande.";
-            TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
+            MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
         }
         else
         {
-            // On transforme l'image en ratio 1:1 
-            // On récupère le côté le plus petit
-            UINT minDimension = min(bitmap.bmWidth, bitmap.bmHeight);
+            // Calcul des dimensions à afficher (réduit ou agrandit l'image pour qu'elle tienne dans le carré)
+            int srcWidth = (bitmap.bmWidth > squareSize) ? squareSize : bitmap.bmWidth;
+            int srcHeight = (bitmap.bmHeight > squareSize) ? squareSize : bitmap.bmHeight;
 
-            // On crée un offset en fonction du côté le plus grand
-            // pour centrer l'image
-            UINT xOffset = (bitmap.bmWidth > minDimension) ? (bitmap.bmWidth - minDimension) / 2 : 0;
-            UINT yOffset = (bitmap.bmHeight > minDimension) ? (bitmap.bmHeight - minDimension) / 2 : 0;
-
-            // On stocke la taille de l'image finale
-            actualImageDimensions = minDimension;
-
-            // Fonction pour dessiner l'image
-            BitBlt(hdc, 0, 0, minDimension, minDimension, hdcMem, xOffset, yOffset, SRCCOPY);
+            // Affiche l'image dans le carré
+            StretchBlt(hdc, posX, posY, squareSize, squareSize, hdcMem, 0, 0, srcWidth, srcHeight, SRCCOPY);
         }
 
         DeleteDC(hdcMem);
-        DeleteObject(hBitmap);
     }
     else
     {
         // Affiche une erreur car l'image n'a pas pu être chargée
-        const wchar_t* errorMessage = L"Erreur: Impossible de charger l'image.";
-        TextOut(hdc, 10, 10, errorMessage, lstrlenW(errorMessage));
+        MessageBox(hwnd, L"Erreur: Impossible de charger l'image.", L"Erreur inconnue", MB_OK | MB_ICONERROR);
     }
 }
+
+bool ImageManager::IsPNGFile(LPCWSTR filePath)
+{
+    std::wstring path(filePath);
+    // Récupère l'extension du fichier déposé
+    size_t extPos = path.find_last_of(L".");
+    if (extPos == std::wstring::npos)
+        return false;  // Pas d'extension trouvée
+
+    // Vérifie si l'extension du fichier est bien "png"
+    std::wstring extension = path.substr(extPos + 1);
+    if (extension == L"png" || extension == L"PNG")
+    {
+        return true;
+    }
+    return false;
+}
+
