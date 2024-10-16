@@ -31,8 +31,4 @@
 #include "ImageManager.h"
 #include "MessageManager.h"
 // Bibliothèques supplémentaires
-#include <shobjidl.h>
 #include <shellapi.h>
-#include <wincodec.h>
-#pragma comment(lib, "windowscodecs.lib")
-#include <string>
