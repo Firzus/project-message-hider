@@ -2,6 +2,10 @@
 #include "project-message-hider.h"
 #include <string>
 
+#include <shellscalingapi.h>
+
+#pragma comment(lib, "Shcore.lib")
+
 #include "FontManager.h"
 #include "Theme.h"
 #include "Button.h"
@@ -42,7 +46,6 @@ static Button* btnSubmit;
 static Button* btnDownload;
 static Button* btnReset;
 
-
 static BoxComponent* stepBox;
 static TextComponent* stepText;
 
@@ -53,6 +56,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+
+    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
     // Initialise les chaînes globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
