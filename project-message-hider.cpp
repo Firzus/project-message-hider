@@ -29,6 +29,7 @@ HINSTANCE hInst;                                // instance actuelle
 WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
 WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
 ImageManager imageManager;
+MessageManager messManager;
 
 // Déclarations anticipées des fonctions incluses dans ce module de code :
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -78,12 +79,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
     HDC hdc = GetDC(NULL);
-    MessageManager messManager;
-    WCHAR currentDir[MAX_PATH];
+    /*MessageManager messManager;
+    //WCHAR currentDir[MAX_PATH];
 
-    GetCurrentDirectoryW(MAX_PATH, currentDir);
+    //GetCurrentDirectoryW(MAX_PATH, currentDir);
     messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
-    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());
+    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());*/
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -205,6 +206,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // Charge et affiche l'image dans la fenêtre
             imageManager.paintImage(hdc, hWnd, filePath);
+            std::wstring path(filePath);
+            std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+            if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+            OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
             ReleaseDC(hWnd, hdc);
         }
 

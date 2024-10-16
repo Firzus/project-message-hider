@@ -17,11 +17,10 @@ bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::strin
         return false;
     }
     
-    if (!SaveBitmapAsPng(hBitmap, L"EncryptedImg.png", hdc)) {
+    if (!SaveBitmapAsPng(hBitmap, (ImagePath.substr(0, ImagePath.find('.')) + L"_encrypted.png"), hdc)) {
         OutputDebugStringA("Error while saving image.\n");
         return false;
     }
-    OutputDebugStringA("Saved to EncryptedImg.png\n");
     DeleteObject(hBitmap);
     return true;
 }
