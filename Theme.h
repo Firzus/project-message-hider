@@ -12,7 +12,7 @@ public:
 	~Theme();
 
 	void AddColor(int index, COLORREF color);
+	void InvertColors();
 	COLORREF GetColor(int index);
-	std::string GetColorHex(int index);
 };
 

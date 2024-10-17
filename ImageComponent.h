@@ -6,38 +6,35 @@
 #pragma comment (lib,"Gdiplus.lib")
 
 class ImageComponent {
-public:
-    ImageComponent(const std::wstring& imagePath, int posX, int posY, int width, int height);
-    // Deuxième constructeur exclusivement pour les images qu'on upload
-    ImageComponent();
-    ~ImageComponent();
-
-    void Draw(HDC hdc);
-    void SetImage(const std::wstring& imagePath);
-
-    bool IsValidFile(LPCWSTR filePath);
-    void LoadAndDrawImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
-
-    void DrawImage(HDC hdc, HWND hwnd);
-    HBITMAP hBitmap;
-    bool isAnImageLoaded = false;
-
-private:
-    HBITMAP LoadPNGImage(LPCWSTR filePath);
+	const std::wstring& imagePath;
 
     Gdiplus::Image* image;
     int posX, posY;
     int width, height;
+    bool isAnImageLoaded = false;
 
-    // Position et taille de l'image dans la fenêtre
+    // Position et taille de l'image dans la fenï¿½tre
     int dimensionLimit = 980;
     int uploadedImagePosX = 1381;
     int uploadedImagePosY = 541;
     int squareSize = 463;
 
-    // Informations sur l'écran pour positionner l'image correctement
+    // Informations sur l'ï¿½cran pour positionner l'image correctement
     RECT workArea;
     int workAreaHeight;
     int titleBarHeight;
     int spaceBetweenObjects = 48;
+
+public:
+    ImageComponent(const std::wstring& imagePath, int posX, int posY, int width, int height);
+    ~ImageComponent();
+
+    void Draw(HDC hdc);
+    void CalculatePreviewDimensions();
+    bool IsValidFile(LPCWSTR filePath);
+    HBITMAP hBitmap;
+
+	// Getters
+	const std::wstring& GetImagePath() const { return imagePath; }
+    bool GetIsAnImageLoaded() const { return isAnImageLoaded; }
 };

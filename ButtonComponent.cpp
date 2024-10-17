@@ -35,10 +35,6 @@ void ButtonComponent::OnClick() {
     MessageBox(NULL, L"Button Clicked!", L"Notification", MB_OK);
 }
 
-void ButtonComponent::DeleteButton(HWND hWnd) {
-    InvalidateRect(hWnd, NULL, TRUE);
-}
-
 void ButtonComponent::SetStyle(HWND hWnd, bool isPrimary)
 {
 	this->isPrimary = isPrimary;
