@@ -17,9 +17,26 @@ Theme::Theme()
 
 Theme::~Theme() {}
 
-// Méthode pour ajouter une nouvelle couleur avec un index
 void Theme::AddColor(int index, COLORREF color) {
     colorPalette[index] = color;
+}
+
+void Theme::InvertColors() {
+    // Créer une copie de la palette actuelle pour faciliter l'inversion
+    std::map<int, COLORREF> tempPalette = colorPalette;
+
+    // Inverser les couleurs en échangeant symétriquement les valeurs
+    colorPalette[50] = tempPalette[950];
+    colorPalette[100] = tempPalette[900];
+    colorPalette[200] = tempPalette[800];
+    colorPalette[300] = tempPalette[700];
+    colorPalette[400] = tempPalette[600];
+    colorPalette[500] = tempPalette[500];
+    colorPalette[600] = tempPalette[400];
+    colorPalette[700] = tempPalette[300];
+    colorPalette[800] = tempPalette[200];
+    colorPalette[900] = tempPalette[100];
+    colorPalette[950] = tempPalette[50];
 }
 
 // Méthode pour obtenir une couleur par index
@@ -31,12 +48,4 @@ COLORREF Theme::GetColor(int index) {
         // Retourner une valeur par défaut (rouge) si l'index n'existe pas
         return RGB(255, 10, 10);
     }
-}
-
-// Méthode pour obtenir une couleur par index sous forme hexadécimale (optionnel)
-std::string Theme::GetColorHex(int index) {
-    COLORREF color = GetColor(index);
-    char hexColor[8];
-    sprintf_s(hexColor, "#%02X%02X%02X", GetRValue(color), GetGValue(color), GetBValue(color));
-    return std::string(hexColor);
 }

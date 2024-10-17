@@ -6,21 +6,9 @@
 #pragma comment (lib,"Gdiplus.lib")
 
 class ImageComponent {
-public:
-    ImageComponent(const std::wstring& imagePath, int posX, int posY, int width, int height);
-    // Deuxième constructeur exclusivement pour les images qu'on upload
-    ImageComponent();
-    ~ImageComponent();
-
-    void Draw(HDC hdc);
-    void SetImage(const std::wstring& imagePath);
-
-    bool IsValidFile(LPCWSTR filePath);
-    void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
-    HBITMAP hBitmap;
-
-private:
     HBITMAP LoadPNGImage(LPCWSTR filePath);
+
+	const std::wstring& imagePath;
 
     Gdiplus::Image* image;
     int posX, posY;
@@ -37,4 +25,17 @@ private:
     int workAreaHeight;
     int titleBarHeight;
     int spaceBetweenObjects = 48;
+
+public:
+    ImageComponent(const std::wstring& imagePath, int posX, int posY, int width, int height);
+    ~ImageComponent();
+
+    void Draw(HDC hdc);
+    void CalculatePreviewDimensions();
+    bool IsValidFile(LPCWSTR filePath);
+    void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
+    HBITMAP hBitmap;
+
+	// Getters
+	const std::wstring& GetImagePath() const { return imagePath; }
 };

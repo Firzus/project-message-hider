@@ -60,7 +60,7 @@ static BoxComponent* counter3Box = nullptr;
 static TextComponent* titleText = nullptr;
 
 // TODO : TO REMOVE, TEST ONLY
-std::wstring counterTextContent = L"1 of 3";
+static ImageComponent* uploadedImage = nullptr;
 
 static ButtonComponent* btnTest = nullptr;
 
@@ -160,6 +160,16 @@ static void UpdateState(HWND hWnd, int newState)
         step1Text->SetColor(hWnd, theme.GetColor(50));
         step2Text->SetColor(hWnd, theme.GetColor(950));
         step3Text->SetColor(hWnd, theme.GetColor(950));
+
+		delete step1IconDark;
+		delete step3IconLight;
+
+		step1IconDark = nullptr;
+		step3IconLight = nullptr;
+
+		step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
+		step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+
         break;
     case 2:
         // Counter
@@ -175,6 +185,16 @@ static void UpdateState(HWND hWnd, int newState)
 		step1Text->SetColor(hWnd, theme.GetColor(950));
 		step2Text->SetColor(hWnd, theme.GetColor(50));
 		step3Text->SetColor(hWnd, theme.GetColor(950));
+
+		delete step1IconLight;
+		delete step2IconDark;
+
+        step1IconLight = nullptr;
+		step2IconDark = nullptr;
+
+        step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
+        step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+
         break;
     case 3:
         // Counter
@@ -190,11 +210,20 @@ static void UpdateState(HWND hWnd, int newState)
         step1Text->SetColor(hWnd, theme.GetColor(950));
         step2Text->SetColor(hWnd, theme.GetColor(950));
         step3Text->SetColor(hWnd, theme.GetColor(50));
+
+		delete step3IconDark;
+		delete step2IconLight;
+
+        step3IconDark = nullptr;
+		step2IconLight = nullptr;
+
+        step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
+        step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+
         break;
     }
 
-    counterTextContent = std::to_wstring(state) + L" of 3";
-    counterText->SetText(hWnd, counterTextContent);
+    counterText->SetText(hWnd, std::to_wstring(state) + L" of 3");
 
     // Refresh UI
     InvalidateRect(hWnd, NULL, TRUE);
@@ -321,7 +350,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             btnTest = new ButtonComponent(1776, 48, 96, 36, 1, true);
             
             // Counter
-            counterText = new TextComponent(fontManager.GetFontMuted(), counterTextContent, 48, 64, 37, theme.GetColor(950));
+            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(950));
             counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
             counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
             counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
@@ -333,18 +362,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step1Box = new BoxComponent(48, 293, theme.GetColor(800));
             step1Text = new TextComponent(fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 169, 422, 334, theme.GetColor(50));
             step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
-            step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
 
 			// Step2
             step2Box = new BoxComponent(672, 293, theme.GetColor(200));
             step2Text = new TextComponent(fontManager.GetFontLarge(), L"2. Hide or extract the message.", 821, 422, 278, theme.GetColor(950));
-            step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
             step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
 
             // Step3
             step3Box = new BoxComponent(1296, 293, theme.GetColor(200));
             step3Text = new TextComponent(fontManager.GetFontLarge(), L"3. Check the result.", 1496, 422, 176, theme.GetColor(950));
-            step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
 			// Drag and Drop Area
@@ -377,30 +403,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wchar_t filePath[MAX_PATH];
             if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
-                ImageComponent uploadedImage;
-
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
-                if (!uploadedImage.IsValidFile(filePath))
+                if (!uploadedImage->IsValidFile(filePath))
                 {
                     MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
                     DragFinish(hDrop);
                     break;
                 }
 
-
                 // Libérer la ressource précédente si une image était déjà chargée 
                 // (pour éviter des problèmes d'affichage non voulus)
-                if (uploadedImage.hBitmap)
+                if (uploadedImage->hBitmap)
                 {
-                    DeleteObject(uploadedImage.hBitmap);
-                    uploadedImage.hBitmap = NULL;
+                    DeleteObject(uploadedImage->hBitmap);
+                    uploadedImage->hBitmap = NULL;
                 }
 
                 // Récupère la fenêtre actuelle
                 HDC hdc = GetDC(hWnd);
 
                 // Charge et affiche l'image dans la fenêtre
-                uploadedImage.PaintImage(hdc, hWnd, filePath);
+                uploadedImage->PaintImage(hdc, hWnd, filePath);
                 std::wstring path(filePath);
                 std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
                 if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
@@ -451,15 +474,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (step1Box) step1Box->Draw(hdc, 576, 200);
 			if (step1Text) step1Text->Draw(hdc);
 			if (step1IconLight) step1IconLight->Draw(hdc);
+			if (step1IconDark) step1IconDark->Draw(hdc);
 			
 			// Step 2
 			if (step2Box) step2Box->Draw(hdc, 576, 200);
 			if (step2Text) step2Text->Draw(hdc);
+			if (step2IconLight) step2IconLight->Draw(hdc);
 			if (step2IconDark) step2IconDark->Draw(hdc);
             
             // Step 3
 			if (step3Box) step3Box->Draw(hdc, 576, 200);
 			if (step3Text) step3Text->Draw(hdc);
+			if (step3IconLight) step3IconLight->Draw(hdc);
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
             DrawDragAndDropArea(hdc);

@@ -1,44 +1,9 @@
 #include "ImageComponent.h"
 
-ImageComponent::ImageComponent(const std::wstring& imagePath, int posX, int posY, int width, int height)
-    : posX(posX), posY(posY), width(width), height(height), image(nullptr)
+ImageComponent::ImageComponent(const std::wstring& initialImagePath, int posX, int posY, int width, int height) : posX(posX), posY(posY), width(width), height(height), imagePath(initialImagePath)
 {
-    // Initialise GDI+
-    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-    ULONG_PTR gdiplusToken;
-    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+    CalculatePreviewDimensions();
 
-    SetImage(imagePath);
-}
-
-ImageComponent::ImageComponent()
-{
-    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-    ULONG_PTR gdiplusToken;
-    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
-    // Calcul de la hauteur de la barre de titre
-    titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
-
-    // Calcul de la hauteur de la zone de travail
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
-    workAreaHeight = workArea.bottom - workArea.top;
-
-    // Nouveau calcul des dimensions de la preview pour prendre en compte
-    // la taille de la barre de titre et la barre des tâches
-    squareSize = workAreaHeight - (titleBarHeight + uploadedImagePosY + spaceBetweenObjects);
-
-    // Nouveau calcul de la position X pour que la preview soit toujours alignée
-    uploadedImagePosX = 1920 - spaceBetweenObjects - squareSize;
-}
-
-ImageComponent::~ImageComponent() {
-    if (image) {
-        delete image;
-    }
-}
-
-void ImageComponent::SetImage(const std::wstring& imagePath) {
     if (image) {
         delete image;
     }
@@ -61,6 +26,11 @@ void ImageComponent::SetImage(const std::wstring& imagePath) {
     }
 }
 
+ImageComponent::~ImageComponent() {
+    if (image) {
+        delete image;
+    }
+}
 
 HBITMAP ImageComponent::LoadPNGImage(LPCWSTR filePath)
 {
@@ -137,14 +107,28 @@ void ImageComponent::PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
         // Affiche une erreur si l'image n'a pas pu être chargée
         MessageBox(hwnd, L"Erreur: Impossible de charger l'image.", L"Erreur de chargement", MB_OK | MB_ICONERROR);
     }
-
 }
 
 void ImageComponent::Draw(HDC hdc) {
-    if (image) {
-        Gdiplus::Graphics graphics(hdc);
+    Gdiplus::Graphics graphics(hdc);
 
-        // Dessiner l'image avec redimensionnement
-        graphics.DrawImage(image, posX, posY, width, height);
-    }
+    // Dessiner l'image avec redimensionnement
+    graphics.DrawImage(image, posX, posY, width, height);
+}
+
+void ImageComponent::CalculatePreviewDimensions()
+{
+    // Calcul de la hauteur de la barre de titre
+    titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+
+    // Calcul de la hauteur de la zone de travail
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+    workAreaHeight = workArea.bottom - workArea.top;
+
+    // Nouveau calcul des dimensions de la preview pour prendre en compte
+    // la taille de la barre de titre et la barre des tâches
+    squareSize = workAreaHeight - (titleBarHeight + uploadedImagePosY + spaceBetweenObjects);
+
+    // Nouveau calcul de la position X pour que la preview soit toujours alignée
+    uploadedImagePosX = 1920 - spaceBetweenObjects - squareSize;
 }
