@@ -27,6 +27,7 @@ ULONG_PTR gdiplusToken;
 #define ICON_OUTPUT_DARK L"resources\\icons\\output-icon-dark.png"
 #define ICON_SET_LIGHT L"resources\\icons\\set-icon-light.png"
 #define ICON_SET_DARK L"resources\\icons\\set-icon-dark.png"
+#define PREVIEW_IMAGE L"resources\\images\\Preview.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -102,7 +103,7 @@ void CreateDragAndDropArea()
     // Définit la zone de drag and drop
     int left = 48;
     int right = 1333;
-    int up = titleBarHeight + 541;
+    int up = 541;
     int down = workAreaHeight - (titleBarHeight + 48);
     dragDropArea = { left, up, right, down };
 
@@ -321,7 +322,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
 
-
                 // Libérer la ressource précédente si une image était déjà chargée 
                 // (pour éviter des problèmes d'affichage non voulus)
                 if (uploadedImage.hBitmap)
@@ -397,6 +397,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if(btnTest) btnTest->Draw(hdc);
 
             DrawDragAndDropArea(hdc);
+
+            // Preview image
+            ImageComponent previewImage;
+            previewImage.PaintImage(hdc, hWnd, PREVIEW_IMAGE);
 
             EndPaint(hWnd, &ps);
         }
