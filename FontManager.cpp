@@ -1,6 +1,6 @@
 #include "FontManager.h"
 
-FontManager::FontManager()
+FontManager::FontManager() : hFontTitle(NULL), hFontSubtitle(NULL), hFontParagraph(NULL), hFontLead(NULL), hFontLarge(NULL), hFontSmall(NULL), hFontMuted(NULL)
 {
     hFontTitlePath = L"resources/fonts/Inter-ExtraBold.ttf";
     hFontSubtitlePath = L"resources/fonts/Inter-SemiBold.ttf";

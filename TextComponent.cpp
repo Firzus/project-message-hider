@@ -1,10 +1,18 @@
 #include "TextComponent.h"
 
-TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int posY, int frameWidth,HFONT font, COLORREF textColor)
-	: text(text), posX(posX), posY(posY), textColor(textColor), frameWidth(frameWidth)
+TextComponent::TextComponent(int posX, int posY, COLORREF textColor)
+    : posX(posX), posY(posY), textColor(textColor) {}
+
+TextComponent::~TextComponent() {}
+
+void TextComponent::Draw(HDC hdc, HFONT font, const std::wstring& text, int frameWidth)
 {
     // Sélectionner la police dans le contexte de périphérique
     HFONT oldFont = (HFONT)SelectObject(hdc, font);
+    if (oldFont == HGDI_ERROR) {
+        // Si la sélection échoue, ne pas dessiner
+        return;
+    }
 
     // Définir la couleur du texte
     SetTextColor(hdc, textColor);
@@ -12,7 +20,7 @@ TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int po
 
     // Calculer la taille du texte
     SIZE textSize;
-    GetTextExtentPoint32(hdc, text.c_str(), text.length(), &textSize);
+    GetTextExtentPoint32(hdc, text.c_str(), (int)text.length(), &textSize);
 
     // Rectangle pour le texte
     RECT rect;
@@ -21,14 +29,17 @@ TextComponent::TextComponent(HDC hdc, const std::wstring& text, int posX, int po
     // Dessiner le texte avec DT_WORDBREAK pour gérer le retour à la ligne
     DrawText(hdc, text.c_str(), -1, &rect, DT_WORDBREAK | DT_NOPREFIX | DT_NOCLIP);
 
-    // Restauration de la police précédente
+    // Restaurer la police précédente
     SelectObject(hdc, oldFont);
 }
-
-TextComponent::~TextComponent() {}
 
 void TextComponent::SetColor(HWND hWnd, COLORREF newColor)
 {
 	textColor = newColor;
+	InvalidateRect(hWnd, nullptr, TRUE);
+}
+
+void TextComponent::DeleteText(HWND hWnd)
+{
 	InvalidateRect(hWnd, nullptr, TRUE);
 }

@@ -48,13 +48,13 @@ Theme theme;
 // Composants
 
 // Counter
-static TextComponent* counterText;
-static BoxComponent* counter1Box;
-static BoxComponent* counter2Box;
-static BoxComponent* counter3Box;
+static TextComponent* counterText = nullptr;
+static BoxComponent* counter1Box = nullptr;
+static BoxComponent* counter2Box = nullptr;
+static BoxComponent* counter3Box = nullptr;
 
 // Title
-static TextComponent* titleText;
+static TextComponent* titleText = nullptr;
 
 // TODO : TO REMOVE, TEST ONLY
 std::wstring counterTextContent = L"1 of 3";
@@ -64,35 +64,22 @@ static ButtonComponent* btnTest = nullptr;
 // Buttons
 
 // Step 1
-static BoxComponent* step1Box;
-static TextComponent* step1Text;
-static ImageComponent* step1IconLight;
-static ImageComponent* step1IconDark;
+static BoxComponent* step1Box = nullptr;
+static TextComponent* step1Text = nullptr;
+static ImageComponent* step1IconLight = nullptr;
+static ImageComponent* step1IconDark = nullptr;
 
 // Step 2
-static BoxComponent* step2Box;
-static TextComponent* step2Text;
-static ImageComponent* step2IconLight;
-static ImageComponent* step2IconDark;
+static BoxComponent* step2Box = nullptr;
+static TextComponent* step2Text = nullptr;
+static ImageComponent* step2IconLight = nullptr;
+static ImageComponent* step2IconDark = nullptr;
 
 // Step 3
-static BoxComponent* step3Box;
-static TextComponent* step3Text;
-static ImageComponent* step3IconLight;
-static ImageComponent* step3IconDark;
-
-static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar_t* text) {
-    // Dessiner le bouton
-    HBRUSH hBrush = CreateSolidBrush(RGB(200, 200, 200)); // Couleur de remplissage
-    RECT rect = { x, y, x + width, y + height };
-    FillRect(hdc, &rect, hBrush);
-    DeleteObject(hBrush);
-
-    // Dessiner le texte
-    SetTextColor(hdc, RGB(0, 0, 0)); // Couleur du texte
-    SetBkMode(hdc, TRANSPARENT);
-    DrawText(hdc, text, -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-}
+static BoxComponent* step3Box = nullptr;
+static TextComponent* step3Text = nullptr;
+static ImageComponent* step3IconLight = nullptr;
+static ImageComponent* step3IconDark = nullptr;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -102,15 +89,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     srand(time(0));
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
-    step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
-
-	step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
-	step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
-
-	step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
-	step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
@@ -218,7 +196,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
+            // TEST ONLYs
             btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
+            
+            // Counter
+            counterText = new TextComponent(48, 64, theme.GetColor(950));
+            counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
+            counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
+            counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
+
+            // Title
+            titleText = new TextComponent(48, 129, theme.GetColor(950));
+
+            // Step1
+            step1Box = new BoxComponent(48, 293, theme.GetColor(800));
+            step1Text = new TextComponent(169, 422, theme.GetColor(50));
+            step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
+            step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
+
+			// Step2
+            step2Box = new BoxComponent(672, 293, theme.GetColor(200));
+            step2Text = new TextComponent(821, 422, theme.GetColor(950));
+            step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+            step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
+
+            // Step3
+            step3Box = new BoxComponent(1296, 293, theme.GetColor(200));
+            step3Text = new TextComponent(1496, 422, theme.GetColor(950));
+            step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+            step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
         }
         break;
 
@@ -249,7 +255,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             }
             
-
             // Libérer la ressource précédente si une image était déjà chargée 
             // (pour éviter des problèmes d'affichage non voulus)
             if (uploadedImage.hBitmap)
@@ -277,10 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
         if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
-            btnTest->OnClick();
-			delete btnTest;
-			btnTest = nullptr;
-			btnTest->DeleteButton(hWnd);
+            //
         }
     } break;
     // Dessine la fenêtre et son contenu
@@ -300,28 +302,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBrush);
 
             // Counter
-            counter1Box = new BoxComponent(hdc, 48, 48, 48, 8, theme.GetColor(900));
-            counter2Box = new BoxComponent(hdc, 100, 48, 48, 8, theme.GetColor(300));
-            counter3Box = new BoxComponent(hdc, 152, 48, 48, 8, theme.GetColor(300));
-            counterText = new TextComponent(hdc, counterTextContent, 48, 64, 37, fontManager.GetFontMuted(), theme.GetColor(950));
+			if(counter1Box) counter1Box->Draw(hdc, 48, 8);
+			if(counter2Box) counter2Box->Draw(hdc, 48, 8);
+			if(counter3Box) counter3Box->Draw(hdc, 48, 8);
+			if(counterText) counterText->Draw(hdc, fontManager.GetFontMuted(), counterTextContent, 37);
 
             //Text
-            titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
+            if (titleText) titleText->Draw(hdc, fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 916);
 
             // Step 1
-			step1Box = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(800));
-            step1Text = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
-			step1IconLight->Draw(hdc);
-
+			if (step1Box) step1Box->Draw(hdc, 576, 200);
+			if (step1Text) step1Text->Draw(hdc, fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 334);
+			if (step1IconLight) step1IconLight->Draw(hdc);
+			
 			// Step 2
-            step2Box = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
-			step2Text = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
-            step2IconDark->Draw(hdc);
-
+			if (step2Box) step2Box->Draw(hdc, 576, 200);
+			if (step2Text) step2Text->Draw(hdc, fontManager.GetFontLarge(), L"2. Hide or extract the message.", 278);
+			if (step2IconDark) step2IconDark->Draw(hdc);
+            
             // Step 3
-			step3Box = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
-			step3Text = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
-            step3IconDark->Draw(hdc);
+			if (step3Box) step3Box->Draw(hdc, 576, 200);
+			if (step3Text) step3Text->Draw(hdc, fontManager.GetFontLarge(), L"3. Check the result.", 176);
+			if (step3IconDark) step3IconDark->Draw(hdc);
 
             // Buttons
             if(btnTest) btnTest->Draw(hdc);
@@ -331,8 +333,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_DESTROY:
-		delete btnTest;
-
         PostQuitMessage(0);
         break;
     default:
