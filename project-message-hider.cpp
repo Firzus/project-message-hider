@@ -15,6 +15,7 @@
 #include "TextComponent.h"
 #include "BoxComponent.h"
 #include "ImageComponent.h"
+#include "TextFieldComponent.h"
 
 ULONG_PTR gdiplusToken;
 
@@ -53,6 +54,12 @@ static BoxComponent* counter1Box;
 static BoxComponent* counter2Box;
 static BoxComponent* counter3Box;
 
+// encryption
+static BoxComponent* encryptionBox;
+static TextComponent* encryptionText;
+static TextComponent* encryptionLabelText;
+static TextFieldComponent* encryptionTextField;
+
 // Title
 static TextComponent* titleText;
 
@@ -60,6 +67,8 @@ static TextComponent* titleText;
 std::wstring counterTextContent = L"1 of 3";
 
 static ButtonComponent* btnTest = nullptr;
+static ButtonComponent* encryptBtn = nullptr;
+static ButtonComponent* decryptBtn = nullptr;
 
 // Buttons
 
@@ -209,6 +218,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static HFONT hFontTitle, hFontSubtitle, hFontParagraph, hFontLead, hFontLarge, hFontSmall, hFontMuted;
     static DWORD fontCountTitle = 0, fontCountSubtitle = 0, fontCountParagraph = 0, fontCountLead = 0, fontCountLarge = 0, fontCountSmall = 0, fontCountMuted = 0;
+    HDC hdc = GetDC(hWnd);
 
     switch (message)
     {
@@ -219,12 +229,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DragAcceptFiles(hWnd, TRUE);
 
             btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
-        }
+            /*encryptBtn = new ButtonComponent(90, 830, 96, 36, L"Submit", 2, true);
+            //  decryptBtn = new ButtonComponent(900, 802, 96, 36, L"Submit", 3, true);
+
+            // text fields
+            encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);*/
+    }
         break;
 
 
     case WM_COMMAND:
-        switch (LOWORD(wParam)) {
+        switch (HIWORD(wParam)) {
+        case EN_CHANGE:
+            if ((HWND)lParam == encryptionTextField->GetHandle())
+                InvalidateRect(hWnd, nullptr, TRUE);
+            break;
         default :
             break;
         }
@@ -282,6 +301,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			btnTest = nullptr;
 			btnTest->DeleteButton(hWnd);
         }
+
+        if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
+            encryptBtn->OnClick();
+            /*delete btnTest;
+            btnTest = nullptr;
+            btnTest->DeleteButton(hWnd);*/
+        }
     } break;
     // Dessine la fenêtre et son contenu
     case WM_PAINT:
@@ -303,6 +329,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             counter1Box = new BoxComponent(hdc, 48, 48, 48, 8, theme.GetColor(900));
             counter2Box = new BoxComponent(hdc, 100, 48, 48, 8, theme.GetColor(300));
             counter3Box = new BoxComponent(hdc, 152, 48, 48, 8, theme.GetColor(300));
+
             counterText = new TextComponent(hdc, counterTextContent, 48, 64, 37, fontManager.GetFontMuted(), theme.GetColor(950));
 
             //Text
@@ -323,8 +350,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			step3Text = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
             step3IconDark->Draw(hdc);
 
+            // encryption
+            /*encryptionBox = new BoxComponent(hdc, 48, 550, 576, 400, theme.GetColor(200));
+            encryptionText = new TextComponent(hdc, L"Hide a Message", 90, 590, 334, fontManager.GetFontLarge(), theme.GetColor(950));
+            encryptionLabelText = new TextComponent(hdc, encryptionTextField->UpdateCharCount(), 90, 670, 334, fontManager.GetFontLead(), theme.GetColor(950));
+            encryptBtn->Draw(hdc);*/
+
             // Buttons
-            if(btnTest) btnTest->Draw(hdc);
+            if(btnTest) btnTest->Draw(hdc); 
 
             EndPaint(hWnd, &ps);
         }
