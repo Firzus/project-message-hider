@@ -121,7 +121,6 @@ void LaunchNextButton();
 
 int imageSize;
 int uploadedImagePosX;
-int offsetBottom = 0;
 
 void CreateDragAndDropArea()
 {
