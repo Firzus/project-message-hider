@@ -63,6 +63,9 @@ std::wstring counterTextContent = L"1 of 3";
 static ButtonComponent* btnTest = nullptr;
 
 // Buttons
+static ButtonComponent* btnSubmit = nullptr;
+static ButtonComponent* btnReset= nullptr;
+static ButtonComponent* btnDownload= nullptr;
 
 // Step 1
 static BoxComponent* step1Box = nullptr;
@@ -261,7 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DragAcceptFiles(hWnd, TRUE);
 
             // TEST ONLYs
-            btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
+            btnTest = new ButtonComponent(642, 802, 96, 36, 1, true);
             
             // Counter
             counterText = new TextComponent(48, 64, theme.GetColor(950));
@@ -360,7 +363,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
         if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
-            //
+			btnTest->SetStyle(hWnd, !btnTest->GetIsPrimary());
         }
     } break;
     // Dessine la fenêtre et son contenu
@@ -403,10 +406,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (step3Text) step3Text->Draw(hdc, fontManager.GetFontLarge(), L"3. Check the result.", 176);
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
-            // Buttons
-            if(btnTest) btnTest->Draw(hdc);
-
             DrawDragAndDropArea(hdc);
+    
+            // Buttons
+            if(btnTest) btnTest->Draw(hdc, L"Click Me");
 
             // Preview image
             ImageComponent previewImage;
