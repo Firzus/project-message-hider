@@ -151,6 +151,8 @@ bool IsPointInRect(RECT rect, POINT pt)
 
 static void UpdateState(HWND hWnd, int newState)
 {
+    if (newState != state && state == 2)
+        encryptionTextField->Hide();
     state = newState;
 
     switch (state)
@@ -239,12 +241,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
     HDC hdc = GetDC(NULL);
-    /*MessageManager messManager;
-    //WCHAR currentDir[MAX_PATH];
-
-    //GetCurrentDirectoryW(MAX_PATH, currentDir);
-    messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
-    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());*/
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -329,6 +325,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // TEST ONLY
             btnTest = new ButtonComponent(1776, 48, 96, 36, 1, true);
+            encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
             
             // Counter
             counterText = new TextComponent(fontManager.GetFontMuted(), counterTextContent, 48, 64, 37, theme.GetColor(950));
@@ -356,6 +353,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3Text = new TextComponent(fontManager.GetFontLarge(), L"3. Check the result.", 1496, 422, 176, theme.GetColor(950));
             step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+
+            // encryption
+            encryptionBox = new BoxComponent(48, 550, theme.GetColor(200));
+            encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
+            encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
+            encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
+            encryptionTextField->Hide();
 
 			// Drag and Drop Area
             CreateDragAndDropArea();
@@ -484,12 +488,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
             // encryption
-            /*encryptionBox = new BoxComponent(hdc, 48, 550, 576, 400, theme.GetColor(200));
-            encryptionText = new TextComponent(hdc, L"Hide a Message", 90, 590, 334, fontManager.GetFontLarge(), theme.GetColor(950));
-            encryptionLabelText = new TextComponent(hdc, encryptionTextField->UpdateCharCount(), 90, 670, 334, fontManager.GetFontLead(), theme.GetColor(950));
-            encryptBtn->Draw(hdc);*/
-
-            DrawDragAndDropArea(hdc);
+            if (state == 2) {
+                encryptionBox->Draw(hdc, 576, 400);
+                encryptionText->Draw(hdc);
+                if (!IsWindowVisible(encryptionTextField->GetHandle()))
+                    encryptionTextField->Draw();
+                encryptionLabelText->SetText(hWnd, encryptionTextField->UpdateCharCount());
+                encryptionLabelText->Draw(hdc);
+                encryptBtn->Draw(hdc, L"Submit");
+            }
+            if (state == 1)
+                DrawDragAndDropArea(hdc);
     
             // Buttons
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
