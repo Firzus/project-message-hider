@@ -59,11 +59,7 @@ static TextComponent* titleText;
 // TODO : TO REMOVE, TEST ONLY
 std::wstring counterTextContent = L"1 of 3";
 
-static ButtonComponent* btnTest;
-static const int BUTTON_WIDTH = 100;
-static const int BUTTON_HEIGHT = 40;
-static const int BUTTON_X = 10;
-static const int BUTTON_Y = 10;
+static ButtonComponent* btnTest = nullptr;
 
 // Buttons
 
@@ -282,6 +278,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Vérifier si le clic est à l'intérieur du bouton
         if (btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
             btnTest->OnClick();
+			delete btnTest;
+			btnTest = nullptr;
+			btnTest->DeleteButton(hWnd);
         }
     } break;
     // Dessine la fenêtre et son contenu
@@ -325,13 +324,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3IconDark->Draw(hdc);
 
             // Buttons
-            btnTest->Draw(hdc, theme.GetColor(900), theme.GetColor(50));
+            if(btnTest) btnTest->Draw(hdc, theme.GetColor(900), theme.GetColor(50));
 
             EndPaint(hWnd, &ps);
         }
         break;
 
     case WM_DESTROY:
+		delete btnTest;
+
         PostQuitMessage(0);
         break;
     default:

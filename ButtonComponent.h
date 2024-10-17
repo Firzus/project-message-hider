@@ -13,6 +13,7 @@ public:
     void Draw(HDC hdc, COLORREF bgColor, COLORREF textColor);
     bool HitTest(int mouseX, int mouseY) const;
     void OnClick();
+    void DeleteButton(HWND hWnd);
 
     // Get
     int GetId() const { return id; }

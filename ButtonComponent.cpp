@@ -1,7 +1,7 @@
 #include "ButtonComponent.h"
 
 ButtonComponent::ButtonComponent(int x, int y, int width, int height, const wchar_t* text, int id)
-    : posX(x), posY(y), width(width), height(height), text(text), id(id), bgColor(bgColor), textColor(textColor)  {}
+    : posX(x), posY(y), width(width), height(height), text(text), id(id)  {}
 
 void ButtonComponent::Draw(HDC hdc, COLORREF bgColor, COLORREF textColor) {
     // Dessiner le bouton
@@ -17,10 +17,13 @@ void ButtonComponent::Draw(HDC hdc, COLORREF bgColor, COLORREF textColor) {
 }
 
 bool ButtonComponent::HitTest(int mouseX, int mouseY) const {
-    return mouseX >= posX && mouseX <= (posX + width) &&
-        mouseY >= posY && mouseY <= (posY + height);
+    return (mouseX >= posX && mouseX <= (posX + width) && mouseY >= posY && mouseY <= (posY + height));
 }
 
 void ButtonComponent::OnClick() {
     MessageBox(NULL, L"Button Clicked!", L"Notification", MB_OK);
+}
+
+void ButtonComponent::DeleteButton(HWND hWnd) {
+    InvalidateRect(hWnd, NULL, TRUE);
 }
