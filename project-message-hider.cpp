@@ -28,6 +28,7 @@ ULONG_PTR gdiplusToken;
 #define ICON_OUTPUT_DARK L"resources\\icons\\output-icon-dark.png"
 #define ICON_SET_LIGHT L"resources\\icons\\set-icon-light.png"
 #define ICON_SET_DARK L"resources\\icons\\set-icon-dark.png"
+#define PREVIEW_IMAGE L"resources\\images\\Preview.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -103,6 +104,8 @@ int dNDCenterX;
 int dNDCenterY;
 int offsetX = -118;
 
+ImageComponent uploadedImage;
+
 void CreateDragAndDropArea()
 {
     // Calcul de la hauteur de la barre de titre
@@ -117,7 +120,7 @@ void CreateDragAndDropArea()
     // Définit la zone de drag and drop
     int left = 48;
     int right = 1333;
-    int up = titleBarHeight + 541;
+    int up = 541;
     int down = workAreaHeight - (titleBarHeight + 48);
     dragDropArea = { left, up, right, down };
 
@@ -129,15 +132,25 @@ void CreateDragAndDropArea()
 
 void DrawDragAndDropArea(HDC hdc)
 {
-    // Crée un stylo en pointillé
+    // Colore le background de la zone
+    HBRUSH hBrush = CreateSolidBrush(theme.GetColor(50));
+    FillRect(hdc, &dragDropArea, hBrush);
+
+    // Supprime la brosse utilisée pour éviter une fuite de mémoire
+    DeleteObject(hBrush);
+
+    // Crée un stylo en pointillé pour dessiner les bordures
     HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
     HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    // Dessine le cadre autour de la zone sans remplir
+    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
 
-    // Restaure l'ancien stylo et supprime le stylo créé
+    // Restaure l'ancien stylo et brosse
     SelectObject(hdc, hOldPen);
+    SelectObject(hdc, hOldBrush);
+
     DeleteObject(hPen);
 
 	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc);
@@ -395,8 +408,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wchar_t filePath[MAX_PATH];
             if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
-                ImageComponent uploadedImage;
-
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                 if (!uploadedImage.IsValidFile(filePath))
                 {
@@ -404,7 +415,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     DragFinish(hDrop);
                     break;
                 }
-
 
                 // Libérer la ressource précédente si une image était déjà chargée 
                 // (pour éviter des problèmes d'affichage non voulus)
@@ -418,12 +428,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 HDC hdc = GetDC(hWnd);
 
                 // Charge et affiche l'image dans la fenêtre
-                uploadedImage.PaintImage(hdc, hWnd, filePath);
-                std::wstring path(filePath);
-                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                uploadedImage.LoadAndDrawImage(hdc, hWnd, filePath);
+
+                if (uploadedImage.isAnImageLoaded)
+                {
+                    std::wstring path(filePath);
+                    std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                    if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                        MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                    OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                }
+                else
+                {
+                    ImageComponent previewImage;
+                    previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+                }
+
                 ReleaseDC(hWnd, hdc);
             }
         }
@@ -502,6 +522,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     
             // Buttons
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
+
+            // Preview image
+            if (uploadedImage.isAnImageLoaded == false)
+            {
+                ImageComponent previewImage;
+                previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+            }
+            else
+            {
+                // Affiche à nouveau la même image
+                uploadedImage.DrawImage(hdc, hWnd);
+            }
 
             EndPaint(hWnd, &ps);
         }
