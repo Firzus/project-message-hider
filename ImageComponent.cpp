@@ -2,8 +2,6 @@
 
 ImageComponent::ImageComponent(const std::wstring& initialImagePath, int posX, int posY, int width, int height) : posX(posX), posY(posY), width(width), height(height), imagePath(initialImagePath)
 {
-    CalculatePreviewDimensions();
-
     if (image) {
         delete image;
     }
@@ -53,23 +51,24 @@ bool ImageComponent::IsValidFile(LPCWSTR filePath)
 void ImageComponent::Draw(HDC hdc) {
     Gdiplus::Graphics graphics(hdc);
 
-    // Dessiner l'image avec redimensionnement
-    graphics.DrawImage(image, posX, posY, width, height);
-}
+    // Dimensions originales de l'image
+    Gdiplus::REAL imgWidth = image->GetWidth();
+    Gdiplus::REAL imgHeight = image->GetHeight();
 
-void ImageComponent::CalculatePreviewDimensions()
-{
-    // Calcul de la hauteur de la barre de titre
-    titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+    // Calcul de la taille pour un ratio 1:1
+    Gdiplus::REAL squareSize = (imgWidth < imgHeight) ? imgWidth : imgHeight;
 
-    // Calcul de la hauteur de la zone de travail
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
-    workAreaHeight = workArea.bottom - workArea.top;
+    // Calcul pour centrer l'image
+    Gdiplus::REAL cropX = (imgWidth > imgHeight) ? (imgWidth - squareSize) / 2 : 0;
+    Gdiplus::REAL cropY = (imgHeight > imgWidth) ? (imgHeight - squareSize) / 2 : 0;
 
-    // Nouveau calcul des dimensions de la preview pour prendre en compte
-    // la taille de la barre de titre et la barre des tâches
-    squareSize = workAreaHeight - (titleBarHeight + uploadedImagePosY + spaceBetweenObjects);
+    // Rect contenant la position et dimension de l'image rognée
+    Gdiplus::RectF srcRect(cropX, cropY, squareSize, squareSize);
 
-    // Nouveau calcul de la position X pour que la preview soit toujours alignée
-    uploadedImagePosX = 1920 - spaceBetweenObjects - squareSize;
+    // Rect contenant la position et dimension de l'image finale dans la fenêtre
+    Gdiplus::RectF destRect(static_cast<Gdiplus::REAL>(posX), static_cast<Gdiplus::REAL>(posY),
+        static_cast<Gdiplus::REAL>(width), static_cast<Gdiplus::REAL>(height));
+
+    // Dessiner l'image rognée dans le rectangle de destination avec redimensionnement
+    graphics.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, Gdiplus::UnitPixel);
 }

@@ -105,6 +105,9 @@ int dNDCenterX;
 int dNDCenterY;
 int offsetX = -118;
 
+int imageSize;
+int uploadedImagePosX;
+
 void CreateDragAndDropArea()
 {
     // Calcul de la hauteur de la barre de titre
@@ -399,8 +402,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
             encryptionTextField->Hide();
 
+            // Image dimensions
+            
+            // Calcul de la hauteur de la barre de titre
+            int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+            // Calcul de la hauteur de la zone de travail
+            RECT workArea;
+            SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+            int workAreaHeight = workArea.bottom - workArea.top;
+            // Nouveau calcul des dimensions de l'image
+            imageSize = workAreaHeight - (titleBarHeight + 541 + 48);
+            // Nouveau calcul de la position X pour que la preview soit toujours alignée
+            uploadedImagePosX = 1920 - 48 - imageSize;
+
 			// Drag and Drop Area
-            previewImage = new ImageComponent(PREVIEW_IMAGE, 1381, 541, 463, 463);
+            previewImage = new ImageComponent(PREVIEW_IMAGE, uploadedImagePosX, 541, imageSize, imageSize);
 
             CreateDragAndDropArea();
         }
@@ -436,7 +452,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
 				// Crée un nouvel objet ImageComponent
-				uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
+				uploadedImage = new ImageComponent(filePath, uploadedImagePosX, 541, imageSize, imageSize);
 
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                 if (!uploadedImage->IsValidFile(filePath))
