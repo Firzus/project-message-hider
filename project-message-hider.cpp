@@ -64,6 +64,8 @@ static TextComponent* encryptionText;
 static TextComponent* encryptionLabelText;
 static TextFieldComponent* encryptionTextField;
 
+static TextComponent* decryptionText;
+
 // Title
 static TextComponent* titleText = nullptr;
 
@@ -339,6 +341,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // TEST ONLY
             btnTest = new ButtonComponent(1776, 48, 96, 36, 1, true);
             encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
+            decryptBtn = new ButtonComponent(680, 840, 96, 36, 3, true);
             
             // Counter
             counterText = new TextComponent(fontManager.GetFontMuted(), counterTextContent, 48, 64, 37, theme.GetColor(950));
@@ -370,6 +373,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // encryption
             encryptionBox = new BoxComponent(48, 550, theme.GetColor(200));
             encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
+            decryptionText = new TextComponent(fontManager.GetFontLarge(), L"Extract a Message", 680, 590, 334, theme.GetColor(950));
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
             encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
             encryptionTextField->Hide();
@@ -466,6 +470,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             btnTest = nullptr;
             btnTest->DeleteButton(hWnd);*/
         }
+        if (decryptBtn && decryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && decryptBtn->GetId() == 3) {
+            decryptBtn->OnClick();
+            /*delete btnTest;
+            btnTest = nullptr;
+            btnTest->DeleteButton(hWnd);*/
+        }
     } break;
     // Dessine la fenêtre et son contenu
     case WM_PAINT:
@@ -511,11 +521,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (state == 2) {
                 encryptionBox->Draw(hdc, 576, 400);
                 encryptionText->Draw(hdc);
+                decryptionText->Draw(hdc);
                 if (!IsWindowVisible(encryptionTextField->GetHandle()))
                     encryptionTextField->Draw();
                 encryptionLabelText->SetText(hWnd, encryptionTextField->UpdateCharCount());
                 encryptionLabelText->Draw(hdc);
                 encryptBtn->Draw(hdc, L"Submit");
+                decryptBtn->Draw(hdc, L"Submit");
             }
             if (state == 1)
                 DrawDragAndDropArea(hdc);
