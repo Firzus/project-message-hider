@@ -69,44 +69,53 @@ bool ImageComponent::IsValidFile(LPCWSTR filePath)
         || extension == L"jpeg" || extension == L"JPEG");
 }
 
-void ImageComponent::PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
+void ImageComponent::LoadAndDrawImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
 {
     // Charge l'image PNG avec GDI+
     hBitmap = LoadPNGImage(filePath);
 
     if (hBitmap)
     {
-        HDC hdcMem = CreateCompatibleDC(hdc);
-        SelectObject(hdcMem, hBitmap);
-
-        BITMAP bitmap;
-        GetObject(hBitmap, sizeof(bitmap), &bitmap);
-
-        // Limite les dimensions
-        if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
-        {
-            // Affiche une erreur si les dimensions de l'image sont trop grandes
-
-            MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
-        }
-        else
-        {
-            // Calcul des dimensions à afficher (redimensionner pour entrer dans un carré)
-            int srcWidth = (bitmap.bmWidth > squareSize) ? squareSize : bitmap.bmWidth;
-            int srcHeight = (bitmap.bmHeight > squareSize) ? squareSize : bitmap.bmHeight;
-
-            // Affiche l'image dans la fenêtre avec les dimensions spécifiées
-            StretchBlt(hdc, uploadedImagePosX, uploadedImagePosY, squareSize, squareSize, hdcMem, 0, 0, srcWidth, srcHeight, SRCCOPY);
-        }
-
-        DeleteDC(hdcMem);
-        DeleteObject(hBitmap);
+        DrawImage(hdc, hwnd);
     }
     else
     {
         // Affiche une erreur si l'image n'a pas pu être chargée
         MessageBox(hwnd, L"Erreur: Impossible de charger l'image.", L"Erreur de chargement", MB_OK | MB_ICONERROR);
     }
+}
+
+void ImageComponent::DrawImage(HDC hdc, HWND hwnd)
+{
+    HDC hdcMem = CreateCompatibleDC(hdc);
+    SelectObject(hdcMem, hBitmap);
+
+    BITMAP bitmap;
+    GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+
+    // Limite les dimensions de l'image importée
+    if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
+    {
+        // Affiche une erreur si les dimensions de l'image sont trop grandes
+
+        MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
+
+        isAnImageLoaded = false;
+    }
+    else
+    {
+        // Calcul des dimensions à afficher (redimensionner pour entrer dans un carré)
+        int srcWidth = (bitmap.bmWidth > squareSize) ? squareSize : bitmap.bmWidth;
+        int srcHeight = (bitmap.bmHeight > squareSize) ? squareSize : bitmap.bmHeight;
+
+        // Affiche l'image dans la fenêtre avec les dimensions spécifiées
+        StretchBlt(hdc, uploadedImagePosX, uploadedImagePosY, squareSize, squareSize, hdcMem, 0, 0, srcWidth, srcHeight, SRCCOPY);
+
+        isAnImageLoaded = true;
+    }
+
+    DeleteDC(hdcMem);
 }
 
 void ImageComponent::Draw(HDC hdc) {

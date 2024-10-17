@@ -15,6 +15,7 @@
 #include "TextComponent.h"
 #include "BoxComponent.h"
 #include "ImageComponent.h"
+#include "TextFieldComponent.h"
 
 ULONG_PTR gdiplusToken;
 
@@ -27,6 +28,7 @@ ULONG_PTR gdiplusToken;
 #define ICON_OUTPUT_DARK L"resources\\icons\\output-icon-dark.png"
 #define ICON_SET_LIGHT L"resources\\icons\\set-icon-light.png"
 #define ICON_SET_DARK L"resources\\icons\\set-icon-dark.png"
+#define PREVIEW_IMAGE L"resources\\images\\Preview.png"
 
 // Variables globales :
 HINSTANCE hInst;                                // instance actuelle
@@ -56,13 +58,22 @@ static BoxComponent* counter1Box = nullptr;
 static BoxComponent* counter2Box = nullptr;
 static BoxComponent* counter3Box = nullptr;
 
+// encryption
+static BoxComponent* encryptionBox;
+static TextComponent* encryptionText;
+static TextComponent* encryptionLabelText;
+static TextFieldComponent* encryptionTextField;
+
 // Title
 static TextComponent* titleText = nullptr;
 
 // TODO : TO REMOVE, TEST ONLY
 static ImageComponent* uploadedImage = nullptr;
+static ImageComponent* previewImage = nullptr;
 
 static ButtonComponent* btnTest = nullptr;
+static ButtonComponent* encryptBtn = nullptr;
+static ButtonComponent* decryptBtn = nullptr;
 
 // Buttons
 static ButtonComponent* btnSubmit = nullptr;
@@ -108,7 +119,7 @@ void CreateDragAndDropArea()
     // Définit la zone de drag and drop
     int left = 48;
     int right = 1333;
-    int up = titleBarHeight + 541;
+    int up = 541;
     int down = workAreaHeight - (titleBarHeight + 48);
     dragDropArea = { left, up, right, down };
 
@@ -120,15 +131,25 @@ void CreateDragAndDropArea()
 
 void DrawDragAndDropArea(HDC hdc)
 {
-    // Crée un stylo en pointillé
+    // Colore le background de la zone
+    HBRUSH hBrush = CreateSolidBrush(theme.GetColor(50));
+    FillRect(hdc, &dragDropArea, hBrush);
+
+    // Supprime la brosse utilisée pour éviter une fuite de mémoire
+    DeleteObject(hBrush);
+
+    // Crée un stylo en pointillé pour dessiner les bordures
     HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
     HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    // Dessine le cadre autour de la zone sans remplir
+    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
 
-    // Restaure l'ancien stylo et supprime le stylo créé
+    // Restaure l'ancien stylo et brosse
     SelectObject(hdc, hOldPen);
+    SelectObject(hdc, hOldBrush);
+
     DeleteObject(hPen);
 
 	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc);
@@ -142,6 +163,8 @@ bool IsPointInRect(RECT rect, POINT pt)
 
 static void UpdateState(HWND hWnd, int newState)
 {
+    if (newState != state && state == 2)
+        encryptionTextField->Hide();
     state = newState;
 
     switch (state)
@@ -259,12 +282,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
     HDC hdc = GetDC(NULL);
-    /*MessageManager messManager;
-    //WCHAR currentDir[MAX_PATH];
-
-    //GetCurrentDirectoryW(MAX_PATH, currentDir);
-    messManager.HideMessage(std::wstring(currentDir) + L"\\TargetImg.png", "Super Secret messs", hdc);
-    OutputDebugStringA(messManager.GetMessage(L"EncryptedImg.png", hdc).c_str());*/
 
     // Boucle de messages principale :
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -335,6 +352,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static HFONT hFontTitle, hFontSubtitle, hFontParagraph, hFontLead, hFontLarge, hFontSmall, hFontMuted;
     static DWORD fontCountTitle = 0, fontCountSubtitle = 0, fontCountParagraph = 0, fontCountLead = 0, fontCountLarge = 0, fontCountSmall = 0, fontCountMuted = 0;
+    HDC hdc = GetDC(hWnd);
 
     switch (message)
     {
@@ -348,6 +366,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // TEST ONLY
             btnTest = new ButtonComponent(1776, 48, 96, 36, 1, true);
+            encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
             
             // Counter
             counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(950));
@@ -373,12 +392,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3Text = new TextComponent(fontManager.GetFontLarge(), L"3. Check the result.", 1496, 422, 176, theme.GetColor(950));
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
+            // encryption
+            encryptionBox = new BoxComponent(48, 550, theme.GetColor(200));
+            encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
+            encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
+            encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
+            encryptionTextField->Hide();
+
 			// Drag and Drop Area
             CreateDragAndDropArea();
         }
         break;
     case WM_COMMAND:
-        switch (LOWORD(wParam)) {
+        switch (HIWORD(wParam)) {
+        case EN_CHANGE:
+            if ((HWND)lParam == encryptionTextField->GetHandle())
+                InvalidateRect(hWnd, nullptr, TRUE);
+            break;
         default :
             break;
         }
@@ -423,12 +453,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 HDC hdc = GetDC(hWnd);
 
                 // Charge et affiche l'image dans la fenêtre
-                uploadedImage->PaintImage(hdc, hWnd, filePath);
-                std::wstring path(filePath);
-                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                uploadedImage->LoadAndDrawImage(hdc, hWnd, filePath);
+
+                if (uploadedImage->GetIsAnImageLoaded())
+                {
+                    std::wstring path(filePath);
+                    std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                    if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                        MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                    OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                }
+                else
+                {
+                    previewImage = new ImageComponent();
+                    previewImage->LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+                }
+
                 ReleaseDC(hWnd, hdc);
             }
         }
@@ -443,6 +483,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int newState = 0;
 			state >= 3 ? newState = 1 : newState = state + 1;
 			UpdateState(hWnd, newState);
+        }
+
+        if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
+            encryptBtn->OnClick();
+            /*delete btnTest;
+            btnTest = nullptr;
+            btnTest->DeleteButton(hWnd);*/
         }
     } break;
     // Dessine la fenêtre et son contenu
@@ -488,10 +535,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (step3IconLight) step3IconLight->Draw(hdc);
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
-            DrawDragAndDropArea(hdc);
+            // encryption
+            if (state == 2) {
+                encryptionBox->Draw(hdc, 576, 400);
+                encryptionText->Draw(hdc);
+                if (!IsWindowVisible(encryptionTextField->GetHandle()))
+                    encryptionTextField->Draw();
+                encryptionLabelText->SetText(hWnd, encryptionTextField->UpdateCharCount());
+                encryptionLabelText->Draw(hdc);
+                encryptBtn->Draw(hdc, L"Submit");
+            }
+            if (state == 1)
+                DrawDragAndDropArea(hdc);
     
             // Buttons
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
+
+            // Preview image
+            if (uploadedImage.isAnImageLoaded == false)
+            {
+                ImageComponent previewImage;
+                previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+            }
+            else
+            {
+                // Affiche à nouveau la même image
+                uploadedImage.DrawImage(hdc, hWnd);
+            }
 
             EndPaint(hWnd, &ps);
         }

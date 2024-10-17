@@ -13,14 +13,15 @@ class ImageComponent {
     Gdiplus::Image* image;
     int posX, posY;
     int width, height;
+    bool isAnImageLoaded = false;
 
-    // Position et taille de l'image dans la fenêtre
+    // Position et taille de l'image dans la fenï¿½tre
     int dimensionLimit = 980;
     int uploadedImagePosX = 1381;
     int uploadedImagePosY = 541;
     int squareSize = 463;
 
-    // Informations sur l'écran pour positionner l'image correctement
+    // Informations sur l'ï¿½cran pour positionner l'image correctement
     RECT workArea;
     int workAreaHeight;
     int titleBarHeight;
@@ -31,6 +32,8 @@ public:
     ~ImageComponent();
 
     void Draw(HDC hdc);
+    void DrawImage(HDC hdc, HWND hwnd);
+    void LoadAndDrawImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
     void CalculatePreviewDimensions();
     bool IsValidFile(LPCWSTR filePath);
     void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
@@ -38,4 +41,5 @@ public:
 
 	// Getters
 	const std::wstring& GetImagePath() const { return imagePath; }
+    bool GetIsAnImageLoaded() const { return isAnImageLoaded; }
 };
