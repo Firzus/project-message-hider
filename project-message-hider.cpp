@@ -49,10 +49,10 @@ Theme theme;
 // Composants
 
 // Counter
-static TextComponent* counterText;
-static BoxComponent* counter1Box;
-static BoxComponent* counter2Box;
-static BoxComponent* counter3Box;
+static TextComponent* counterText = nullptr;
+static BoxComponent* counter1Box = nullptr;
+static BoxComponent* counter2Box = nullptr;
+static BoxComponent* counter3Box = nullptr;
 
 // encryption
 static BoxComponent* encryptionBox;
@@ -61,7 +61,7 @@ static TextComponent* encryptionLabelText;
 static TextFieldComponent* encryptionTextField;
 
 // Title
-static TextComponent* titleText;
+static TextComponent* titleText = nullptr;
 
 // TODO : TO REMOVE, TEST ONLY
 std::wstring counterTextContent = L"1 of 3";
@@ -71,36 +71,79 @@ static ButtonComponent* encryptBtn = nullptr;
 static ButtonComponent* decryptBtn = nullptr;
 
 // Buttons
+static ButtonComponent* btnSubmit = nullptr;
+static ButtonComponent* btnReset= nullptr;
+static ButtonComponent* btnDownload= nullptr;
 
 // Step 1
-static BoxComponent* step1Box;
-static TextComponent* step1Text;
-static ImageComponent* step1IconLight;
-static ImageComponent* step1IconDark;
+static BoxComponent* step1Box = nullptr;
+static TextComponent* step1Text = nullptr;
+static ImageComponent* step1IconLight = nullptr;
+static ImageComponent* step1IconDark = nullptr;
 
 // Step 2
-static BoxComponent* step2Box;
-static TextComponent* step2Text;
-static ImageComponent* step2IconLight;
-static ImageComponent* step2IconDark;
+static BoxComponent* step2Box = nullptr;
+static TextComponent* step2Text = nullptr;
+static ImageComponent* step2IconLight = nullptr;
+static ImageComponent* step2IconDark = nullptr;
 
 // Step 3
-static BoxComponent* step3Box;
-static TextComponent* step3Text;
-static ImageComponent* step3IconLight;
-static ImageComponent* step3IconDark;
+static BoxComponent* step3Box = nullptr;
+static TextComponent* step3Text = nullptr;
+static ImageComponent* step3IconLight = nullptr;
+static ImageComponent* step3IconDark = nullptr;
 
-static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar_t* text) {
-    // Dessiner le bouton
-    HBRUSH hBrush = CreateSolidBrush(RGB(200, 200, 200)); // Couleur de remplissage
-    RECT rect = { x, y, x + width, y + height };
-    FillRect(hdc, &rect, hBrush);
-    DeleteObject(hBrush);
+// Définition de la zone de drag and drop (gauche, haut, droite, bas)
+RECT dragDropArea;
+static TextComponent* dragAndDropAreaText;
+int dNDCenterX;
+int dNDCenterY;
+int offsetX = -118;
 
-    // Dessiner le texte
-    SetTextColor(hdc, RGB(0, 0, 0)); // Couleur du texte
-    SetBkMode(hdc, TRANSPARENT);
-    DrawText(hdc, text, -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+void CreateDragAndDropArea()
+{
+    // Calcul de la hauteur de la barre de titre
+    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+
+    // Calcul de la hauteur de la zone de travail
+    RECT workArea;
+    int workAreaHeight;
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+    workAreaHeight = workArea.bottom - workArea.top;
+
+    // Définit la zone de drag and drop
+    int left = 48;
+    int right = 1333;
+    int up = titleBarHeight + 541;
+    int down = workAreaHeight - (titleBarHeight + 48);
+    dragDropArea = { left, up, right, down };
+
+    dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
+    dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
+    
+    dragAndDropAreaText = new TextComponent((dNDCenterX + offsetX), dNDCenterY, theme.GetColor(950));
+}
+
+void DrawDragAndDropArea(HDC hdc)
+{
+    // Crée un stylo en pointillé
+    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
+
+    // Restaure l'ancien stylo et supprime le stylo créé
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+
+	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc, fontManager.GetFontParagraph(), L"Drag and Drop the image here.", 278);
+}
+
+bool IsPointInRect(RECT rect, POINT pt)
+{
+    return (pt.x >= rect.left && pt.x <= rect.right &&
+        pt.y >= rect.top && pt.y <= rect.bottom);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -111,15 +154,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     srand(time(0));
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
-    step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
-
-	step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
-	step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
-
-	step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
-	step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 
@@ -228,13 +262,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
-            btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
+            // TEST ONLYs
+            btnTest = new ButtonComponent(642, 802, 96, 36, 1, true);
             /*encryptBtn = new ButtonComponent(90, 830, 96, 36, L"Submit", 2, true);
             //  decryptBtn = new ButtonComponent(900, 802, 96, 36, L"Submit", 3, true);
 
             // text fields
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);*/
-    }
+            
+            // Counter
+            counterText = new TextComponent(48, 64, theme.GetColor(950));
+            counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
+            counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
+            counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
+
+            // Title
+            titleText = new TextComponent(48, 129, theme.GetColor(950));
+
+            // Step1
+            step1Box = new BoxComponent(48, 293, theme.GetColor(800));
+            step1Text = new TextComponent(169, 422, theme.GetColor(50));
+            step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
+            step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
+
+			// Step2
+            step2Box = new BoxComponent(672, 293, theme.GetColor(200));
+            step2Text = new TextComponent(821, 422, theme.GetColor(950));
+            step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+            step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
+
+            // Step3
+            step3Box = new BoxComponent(1296, 293, theme.GetColor(200));
+            step3Text = new TextComponent(1496, 422, theme.GetColor(950));
+            step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+            step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+
+			// Drag and Drop Area
+            CreateDragAndDropArea();
+        }
         break;
 
 
@@ -253,41 +318,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DROPFILES:
     {
         HDROP hDrop = (HDROP)wParam;
-        wchar_t filePath[MAX_PATH];
 
-        // Récupère le chemin du premier fichier déposé
-        if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
+        // Récupère la position du curseur lors du dépôt
+        POINT pt;
+        DragQueryPoint(hDrop, &pt);
+
+        // Convertit la position du point à l'échelle de la fenêtre
+        ScreenToClient(hWnd, &pt);
+
+        // Vérifie si le curseur est dans la zone de drag and drop définie
+        if (IsPointInRect(dragDropArea, pt))
         {
-            ImageComponent uploadedImage;
-            
-            // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
-            if (!uploadedImage.IsValidFile(filePath))
+            // Récupère le chemin du premier fichier déposé
+            wchar_t filePath[MAX_PATH];
+            if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
-                MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
-                DragFinish(hDrop);
-                break;
+                ImageComponent uploadedImage;
+
+                // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
+                if (!uploadedImage.IsValidFile(filePath))
+                {
+                    MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                    DragFinish(hDrop);
+                    break;
+                }
+
+
+                // Libérer la ressource précédente si une image était déjà chargée 
+                // (pour éviter des problèmes d'affichage non voulus)
+                if (uploadedImage.hBitmap)
+                {
+                    DeleteObject(uploadedImage.hBitmap);
+                    uploadedImage.hBitmap = NULL;
+                }
+
+                // Récupère la fenêtre actuelle
+                HDC hdc = GetDC(hWnd);
+
+                // Charge et affiche l'image dans la fenêtre
+                uploadedImage.PaintImage(hdc, hWnd, filePath);
+                std::wstring path(filePath);
+                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                ReleaseDC(hWnd, hdc);
             }
-            
-
-            // Libérer la ressource précédente si une image était déjà chargée 
-            // (pour éviter des problèmes d'affichage non voulus)
-            if (uploadedImage.hBitmap)
-            {
-                DeleteObject(uploadedImage.hBitmap);
-                uploadedImage.hBitmap = NULL;
-            }
-
-            // Récupère la fenêtre actuelle
-            HDC hdc = GetDC(hWnd);
-
-            // Charge et affiche l'image dans la fenêtre
-            uploadedImage.PaintImage(hdc, hWnd, filePath);
-            std::wstring path(filePath);
-            std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-            if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-            OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
-            ReleaseDC(hWnd, hdc);
         }
 
         // Libérer les ressources du drag-and-drop
@@ -296,10 +372,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
         if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
-            btnTest->OnClick();
-			delete btnTest;
-			btnTest = nullptr;
-			btnTest->DeleteButton(hWnd);
+			btnTest->SetStyle(hWnd, !btnTest->GetIsPrimary());
         }
 
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
@@ -326,29 +399,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBrush);
 
             // Counter
-            counter1Box = new BoxComponent(hdc, 48, 48, 48, 8, theme.GetColor(900));
-            counter2Box = new BoxComponent(hdc, 100, 48, 48, 8, theme.GetColor(300));
-            counter3Box = new BoxComponent(hdc, 152, 48, 48, 8, theme.GetColor(300));
-
-            counterText = new TextComponent(hdc, counterTextContent, 48, 64, 37, fontManager.GetFontMuted(), theme.GetColor(950));
+			if(counter1Box) counter1Box->Draw(hdc, 48, 8);
+			if(counter2Box) counter2Box->Draw(hdc, 48, 8);
+			if(counter3Box) counter3Box->Draw(hdc, 48, 8);
+			if(counterText) counterText->Draw(hdc, fontManager.GetFontMuted(), counterTextContent, 37);
 
             //Text
-            titleText = new TextComponent(hdc, L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, fontManager.GetFontTitle(), theme.GetColor(950));
+            if (titleText) titleText->Draw(hdc, fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 916);
 
             // Step 1
-			step1Box = new BoxComponent(hdc, 48, 293, 576, 200, theme.GetColor(800));
-            step1Text = new TextComponent(hdc, L"1. Upload the image to start editing it.", 169, 422, 334, fontManager.GetFontLarge(), theme.GetColor(50));
-			step1IconLight->Draw(hdc);
-
+			if (step1Box) step1Box->Draw(hdc, 576, 200);
+			if (step1Text) step1Text->Draw(hdc, fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 334);
+			if (step1IconLight) step1IconLight->Draw(hdc);
+			
 			// Step 2
-            step2Box = new BoxComponent(hdc, 672, 293, 576, 200, theme.GetColor(200));
-			step2Text = new TextComponent(hdc, L"2. Hide or extract the message.", 821, 422, 278, fontManager.GetFontLarge(), theme.GetColor(950));
-            step2IconDark->Draw(hdc);
-
+			if (step2Box) step2Box->Draw(hdc, 576, 200);
+			if (step2Text) step2Text->Draw(hdc, fontManager.GetFontLarge(), L"2. Hide or extract the message.", 278);
+			if (step2IconDark) step2IconDark->Draw(hdc);
+            
             // Step 3
-			step3Box = new BoxComponent(hdc, 1296, 293, 576, 200, theme.GetColor(200));
-			step3Text = new TextComponent(hdc, L"3. Check the result.", 1496, 422, 176, fontManager.GetFontLarge(), theme.GetColor(950));
-            step3IconDark->Draw(hdc);
+			if (step3Box) step3Box->Draw(hdc, 576, 200);
+			if (step3Text) step3Text->Draw(hdc, fontManager.GetFontLarge(), L"3. Check the result.", 176);
+			if (step3IconDark) step3IconDark->Draw(hdc);
 
             // encryption
             /*encryptionBox = new BoxComponent(hdc, 48, 550, 576, 400, theme.GetColor(200));
@@ -356,16 +428,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionLabelText = new TextComponent(hdc, encryptionTextField->UpdateCharCount(), 90, 670, 334, fontManager.GetFontLead(), theme.GetColor(950));
             encryptBtn->Draw(hdc);*/
 
+            DrawDragAndDropArea(hdc);
+    
             // Buttons
-            if(btnTest) btnTest->Draw(hdc); 
+            if(btnTest) btnTest->Draw(hdc, L"Click Me");
 
             EndPaint(hWnd, &ps);
         }
         break;
 
     case WM_DESTROY:
-		delete btnTest;
-
         PostQuitMessage(0);
         break;
     default:

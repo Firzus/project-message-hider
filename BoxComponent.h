@@ -4,13 +4,14 @@
 
 class BoxComponent
 {
-	int posX, posY; // Position de la box
-	int width, height; // Dimensions de la box
+	int posX, posY;
 	COLORREF fillColor; // Couleur actuelle de la box
 
 public :
-	BoxComponent(HDC hdc, int posX, int posY, int width, int height, COLORREF fillColor);
+	BoxComponent(int posX, int posY, COLORREF fillColor);
 	~BoxComponent();
+	void Draw(HDC hdc, int width, int height);
 	void SetColor(HWND hWnd, COLORREF newColor);
+	void DeleteBox(HWND hWnd);
 };
 
