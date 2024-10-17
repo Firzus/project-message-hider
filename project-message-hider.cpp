@@ -135,7 +135,7 @@ void CreateDragAndDropArea()
 
     // Définit la zone de drag and drop
     int left = 48;
-    int right = 1333;
+    int right = uploadedImagePosX - 48;
     int up = 541;
     int down = workAreaHeight - (titleBarHeight + 48);
     dragDropArea = { left, up, right, down };
@@ -530,7 +530,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
                 {
                     // Crée un nouvel objet ImageComponent
-                    uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
+                    uploadedImage = new ImageComponent(filePath, uploadedImagePosX, 541, imageSize, imageSize);
                     //MessageBox(hWnd, uploadedImage->GetImagePath().c_str(), L"Erreur de format", MB_OK | MB_ICONERROR);
                     // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                     if (!uploadedImage->IsValidFile(filePath))
