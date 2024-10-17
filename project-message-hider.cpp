@@ -86,7 +86,7 @@ RECT dragDropArea;
 static TextComponent* dragAndDropAreaText;
 int dNDCenterX;
 int dNDCenterY;
-int offsetX = -150;
+int offsetX = -118;
 
 static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar_t* text) {
     // Dessiner le bouton
@@ -136,7 +136,7 @@ void DrawDragAndDropArea(HDC hdc)
     SelectObject(hdc, hOldPen);
     DeleteObject(hPen);
 
-    dragAndDropAreaText = new TextComponent(hdc, L"Drag and Drop your image here.", (dNDCenterX + offsetX), dNDCenterY, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+    dragAndDropAreaText = new TextComponent(hdc, L"Drag and Drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 278, fontManager.GetFontLarge(), theme.GetColor(950));
 }
 
 bool IsPointInRect(RECT rect, POINT pt)
