@@ -55,7 +55,7 @@ std::wstring MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
                 char ch = GetCharFromByte(messageBits, messageBits.size() - 8);
                 embededMessage += ch;
                 if (ch == '\0')
-                    return embededMessage;
+                    return SaveMessageInFile(embededMessage, (ImagePath.substr(0, ImagePath.find('.')) + L"_message.txt"));
             }
         }
     }
@@ -217,5 +217,16 @@ char MessageManager::GetCharFromByte(const std::vector<int>& BitsMap, int Index)
         ch |= (BitsMap[Index + i] << i);  // get the BitsMap[Index + i] bit and shif it of i pos by left
     }
     return ch;
+}
+
+std::wstring MessageManager::SaveMessageInFile(std::wstring embededMessage, std::wstring fileName)
+{
+    std::wofstream file(fileName, std::ios::binary);
+    
+    if (file.is_open()) {
+        file.write(embededMessage.c_str(), embededMessage.size());
+        file.close();
+    }
+    return fileName;
 }
 

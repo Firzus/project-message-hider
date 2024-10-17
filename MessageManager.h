@@ -12,4 +12,5 @@ private:
 	HBITMAP GetBitMapFromPng(LPCWSTR filePath, HDC hdc);
 	bool SaveBitmapAsPng(HBITMAP hBitmap, const std::wstring& outputPath, HDC hdc);
 	char GetCharFromByte(const std::vector<int>& BitsMap, int Index);
+	std::wstring SaveMessageInFile(std::wstring embededMessage, std::wstring fileName);
 };
