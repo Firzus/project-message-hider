@@ -6,7 +6,7 @@
 #pragma comment (lib,"Gdiplus.lib")
 
 class ImageComponent {
-	const std::wstring& imagePath;
+	std::wstring imagePath;
 
     Gdiplus::Image* image;
     int posX, posY;
@@ -22,6 +22,6 @@ public:
     HBITMAP hBitmap;
 
 	// Getters
-	const std::wstring& GetImagePath() const { return imagePath; }
+	std::wstring GetImagePath() const { return imagePath; }
     bool GetIsAnImageLoaded() const { return isAnImageLoaded; }
 };
