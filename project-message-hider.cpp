@@ -83,9 +83,10 @@ static ImageComponent* step3IconDark;
 
 // Définition de la zone de drag and drop (gauche, haut, droite, bas)
 RECT dragDropArea;
-void CreateDragAndDropArea();
-void DrawDragAndDropArea(HDC hdc);
-bool IsPointInRect(RECT rect, POINT pt);
+static TextComponent* dragAndDropAreaText;
+int dNDCenterX;
+int dNDCenterY;
+int offsetX = -150;
 
 static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar_t* text) {
     // Dessiner le bouton
@@ -98,6 +99,50 @@ static void DrawButton(HDC hdc, int x, int y, int width, int height, const wchar
     SetTextColor(hdc, RGB(0, 0, 0)); // Couleur du texte
     SetBkMode(hdc, TRANSPARENT);
     DrawText(hdc, text, -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+}
+
+void CreateDragAndDropArea()
+{
+    // Calcul de la hauteur de la barre de titre
+    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+
+    // Calcul de la hauteur de la zone de travail
+    RECT workArea;
+    int workAreaHeight;
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+    workAreaHeight = workArea.bottom - workArea.top;
+
+    // Définit la zone de drag and drop
+    int left = 48;
+    int right = 1333;
+    int up = titleBarHeight + 541;
+    int down = workAreaHeight - (titleBarHeight + 48);
+    dragDropArea = { left, up, right, down };
+
+    dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
+    dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
+}
+
+void DrawDragAndDropArea(HDC hdc)
+{
+    // Crée un stylo en pointillé
+    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
+
+    // Restaure l'ancien stylo et supprime le stylo créé
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+
+    dragAndDropAreaText = new TextComponent(hdc, L"Drag and Drop your image here.", (dNDCenterX + offsetX), dNDCenterY, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+}
+
+bool IsPointInRect(RECT rect, POINT pt)
+{
+    return (pt.x >= rect.left && pt.x <= rect.right &&
+        pt.y >= rect.top && pt.y <= rect.bottom);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -380,43 +425,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
-}
-
-void CreateDragAndDropArea()
-{
-    // Calcul de la hauteur de la barre de titre
-    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
-
-    // Calcul de la hauteur de la zone de travail
-    RECT workArea;
-    int workAreaHeight;
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
-    workAreaHeight = workArea.bottom - workArea.top;
-
-    // Définit la zone de drag and drop
-    int left = 48;
-    int right = 1333;
-    int up = titleBarHeight + 541;
-    int down = workAreaHeight - (titleBarHeight + 48);
-    dragDropArea = { left, up, right, down };
-}
-
-void DrawDragAndDropArea(HDC hdc) 
-{
-    // Crée un stylo en pointillé
-    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
-    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
-    Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
-
-    // Restaure l'ancien stylo et supprime le stylo créé
-    SelectObject(hdc, hOldPen);
-    DeleteObject(hPen);
-}
-
-bool IsPointInRect(RECT rect, POINT pt) 
-{
-    return (pt.x >= rect.left && pt.x <= rect.right &&
-        pt.y >= rect.top && pt.y <= rect.bottom);
 }
