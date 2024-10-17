@@ -136,7 +136,7 @@ void CreateDragAndDropArea()
 
     // Définit la zone de drag and drop
     int left = 48;
-    int right = 1333;
+    int right = uploadedImagePosX - 48;
     int up = 541;
     int down = workAreaHeight - (titleBarHeight + 48);
     dragDropArea = { left, up, right, down };
