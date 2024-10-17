@@ -39,6 +39,9 @@ void TextComponent::SetColor(HWND hWnd, COLORREF newColor)
 	InvalidateRect(hWnd, nullptr, TRUE);
 }
 
+
+// Set text
+
 void TextComponent::DeleteText(HWND hWnd)
 {
 	InvalidateRect(hWnd, nullptr, TRUE);

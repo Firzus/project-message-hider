@@ -45,6 +45,9 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 FontManager fontManager;
 Theme theme;
 
+// State
+int state = 1;
+
 // Composants
 
 // Counter
@@ -135,6 +138,25 @@ bool IsPointInRect(RECT rect, POINT pt)
 {
     return (pt.x >= rect.left && pt.x <= rect.right &&
         pt.y >= rect.top && pt.y <= rect.bottom);
+}
+
+static void UpdateState(int newState, HWND hWnd)
+{
+    state = newState;
+    switch (newState)
+    {
+    case 1:
+       
+        break;
+    case 2:
+     
+        break;
+    case 3:
+       
+        break;
+    }
+    counterTextContent = std::to_wstring(state) + L" of 3";
+    InvalidateRect(hWnd, NULL, TRUE);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -248,7 +270,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         {
-		    fontManager.LoadFont(hWnd);
+			// Crée les polices
+            fontManager.LoadFont(hWnd);
+
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
@@ -353,7 +377,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
         if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
-			btnTest->SetStyle(hWnd, !btnTest->GetIsPrimary());
+			UpdateState(state > 3 ? state = 1 : state++, hWnd);
         }
     } break;
     // Dessine la fenêtre et son contenu
