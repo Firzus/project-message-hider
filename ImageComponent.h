@@ -28,7 +28,13 @@ private:
 
     // Position et taille de l'image dans la fenêtre
     int dimensionLimit = 980;
-    int uploadedImagePosX = 1400;
-    int uploadedImagePosY = 550;
-    int squareSize = 400;
+    int uploadedImagePosX = 1381;
+    int uploadedImagePosY = 541;
+    int squareSize = 463;
+
+    // Informations sur l'écran pour positionner l'image correctement
+    RECT workArea;
+    int workAreaHeight;
+    int titleBarHeight;
+    int spaceBetweenObjects = 48;
 };

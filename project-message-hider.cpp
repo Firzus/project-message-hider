@@ -81,6 +81,57 @@ static TextComponent* step3Text = nullptr;
 static ImageComponent* step3IconLight = nullptr;
 static ImageComponent* step3IconDark = nullptr;
 
+// Définition de la zone de drag and drop (gauche, haut, droite, bas)
+RECT dragDropArea;
+static TextComponent* dragAndDropAreaText;
+int dNDCenterX;
+int dNDCenterY;
+int offsetX = -118;
+
+void CreateDragAndDropArea()
+{
+    // Calcul de la hauteur de la barre de titre
+    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+
+    // Calcul de la hauteur de la zone de travail
+    RECT workArea;
+    int workAreaHeight;
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+    workAreaHeight = workArea.bottom - workArea.top;
+
+    // Définit la zone de drag and drop
+    int left = 48;
+    int right = 1333;
+    int up = titleBarHeight + 541;
+    int down = workAreaHeight - (titleBarHeight + 48);
+    dragDropArea = { left, up, right, down };
+
+    dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
+    dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
+}
+
+void DrawDragAndDropArea(HDC hdc)
+{
+    // Crée un stylo en pointillé
+    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
+
+    // Restaure l'ancien stylo et supprime le stylo créé
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+
+    dragAndDropAreaText = new TextComponent(hdc, L"Drag and Drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+}
+
+bool IsPointInRect(RECT rect, POINT pt)
+{
+    return (pt.x >= rect.left && pt.x <= rect.right &&
+        pt.y >= rect.top && pt.y <= rect.bottom);
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -196,6 +247,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
+            CreateDragAndDropArea();
+
             // TEST ONLYs
             btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
             
@@ -240,19 +293,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DROPFILES:
     {
         HDROP hDrop = (HDROP)wParam;
-        wchar_t filePath[MAX_PATH];
 
-        // Récupère le chemin du premier fichier déposé
-        if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
+        // Récupère la position du curseur lors du dépôt
+        POINT pt;
+        DragQueryPoint(hDrop, &pt);
+
+        // Convertit la position du point à l'échelle de la fenêtre
+        ScreenToClient(hWnd, &pt);
+
+        // Vérifie si le curseur est dans la zone de drag and drop définie
+        if (IsPointInRect(dragDropArea, pt))
         {
-            ImageComponent uploadedImage;
-            
-            // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
-            if (!uploadedImage.IsValidFile(filePath))
+            // Récupère le chemin du premier fichier déposé
+            wchar_t filePath[MAX_PATH];
+            if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
-                MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
-                DragFinish(hDrop);
-                break;
+                ImageComponent uploadedImage;
+
+                // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
+                if (!uploadedImage.IsValidFile(filePath))
+                {
+                    MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                    DragFinish(hDrop);
+                    break;
+                }
+
+
+                // Libérer la ressource précédente si une image était déjà chargée 
+                // (pour éviter des problèmes d'affichage non voulus)
+                if (uploadedImage.hBitmap)
+                {
+                    DeleteObject(uploadedImage.hBitmap);
+                    uploadedImage.hBitmap = NULL;
+                }
+
+                // Récupère la fenêtre actuelle
+                HDC hdc = GetDC(hWnd);
+
+                // Charge et affiche l'image dans la fenêtre
+                uploadedImage.PaintImage(hdc, hWnd, filePath);
+                std::wstring path(filePath);
+                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                ReleaseDC(hWnd, hdc);
             }
             
             // Libérer la ressource précédente si une image était déjà chargée 
@@ -327,6 +412,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // Buttons
             if(btnTest) btnTest->Draw(hdc);
+
+            DrawDragAndDropArea(hdc);
 
             EndPaint(hWnd, &ps);
         }
