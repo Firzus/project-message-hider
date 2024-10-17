@@ -102,10 +102,25 @@ void ImageComponent::PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
         if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
         {
             // Affiche une erreur si les dimensions de l'image sont trop grandes
+
             MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
         }
         else
         {
+            // Calcul de la hauteur de la barre de titre
+            titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+
+            // Calcul de la hauteur de la zone de travail
+            SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+            workAreaHeight = workArea.bottom - workArea.top;
+
+            // Nouveau calcul des dimensions de la preview pour prendre en compte
+            // la taille de la barre de titre et la barre des tâches
+            squareSize = workAreaHeight - (titleBarHeight + uploadedImagePosY + spaceBetweenObjects);
+
+            // Nouveau calcul de la position X pour que la preview soit toujours alignée
+            uploadedImagePosX = 1920 - spaceBetweenObjects - squareSize;
+
             // Calcul des dimensions à afficher (redimensionner pour entrer dans un carré)
             int srcWidth = (bitmap.bmWidth > squareSize) ? squareSize : bitmap.bmWidth;
             int srcHeight = (bitmap.bmHeight > squareSize) ? squareSize : bitmap.bmHeight;
