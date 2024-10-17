@@ -4,12 +4,14 @@
 
 class BoxComponent
 {
-	int posX, posY;
-	COLORREF fillColor;
+	int posX, posY, colorID;
 
 public :
-	BoxComponent(int posX, int posY, COLORREF initialFillColor);
+	BoxComponent(int posX, int posY, int colorID);
 	~BoxComponent();
-	void Draw(HDC hdc, int width, int height);
-	void SetColor(HWND hWnd, COLORREF newColor);
+	void Draw(HDC hdc, int width, int height, COLORREF fillColor) const;
+	void SetColor(HWND hWnd, int newColor);
+
+	// Getter
+	int GetColorID() const { return colorID; }
 };

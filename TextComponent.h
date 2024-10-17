@@ -5,17 +5,19 @@
 
 class TextComponent
 {
-	COLORREF textColor;
 	HFONT font;
-	int posX, posY, frameWidth;
+	int posX, posY, frameWidth, colorID;
 	std::wstring text;
 
 public:
-	TextComponent(HFONT initiaFont, const std::wstring& initialText, int posX, int posY, int initialFrameWidth, COLORREF textColor);
+	TextComponent(HFONT initiaFont, const std::wstring& initialText, int posX, int posY, int initialFrameWidth, int colorID);
 	~TextComponent();
-	void Draw(HDC hdc);
-	void SetColor(HWND hWnd, COLORREF newColor);
+	void Draw(HDC hdc, COLORREF textColor);
+	void SetColor(HWND hWnd, int newColorID);
 	void SetText(HWND hWnd, const std::wstring& newText);
 	void DeleteText(HWND hWnd);
+
+	// Getter
+	int GetColorID() const { return colorID; }
 };
 

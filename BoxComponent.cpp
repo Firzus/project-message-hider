@@ -1,11 +1,11 @@
 #include "BoxComponent.h"
 
-BoxComponent::BoxComponent(int posX, int posY, COLORREF initialFillColor) :
-	posX(posX), posY(posY), fillColor(initialFillColor) {}
+BoxComponent::BoxComponent(int posX, int posY, int colorID) :
+	posX(posX), posY(posY), colorID(colorID) {}
 
 BoxComponent::~BoxComponent() {}
 
-void BoxComponent::Draw(HDC hdc, int width, int height)
+void BoxComponent::Draw(HDC hdc, int width, int height, COLORREF fillColor) const
 {
 	// Créer un pinceau avec la couleur de remplissage
 	HBRUSH hBrush = CreateSolidBrush(fillColor);
@@ -29,6 +29,6 @@ void BoxComponent::Draw(HDC hdc, int width, int height)
 	DeleteObject(hNullPen);
 }
 
-void BoxComponent::SetColor(HWND hWnd, COLORREF newColor) {
-	fillColor = newColor;
+void BoxComponent::SetColor(HWND hWnd, int newColorID) {
+	colorID = newColorID;
 }

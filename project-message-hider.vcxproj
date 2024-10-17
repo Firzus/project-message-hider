@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="BoxComponent.h" />
     <ClInclude Include="ButtonComponent.h" />
+    <ClInclude Include="ButtonModeComponent.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ImageComponent.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="BoxComponent.cpp" />
     <ClCompile Include="ButtonComponent.cpp" />
+    <ClCompile Include="ButtonModeComponent.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="ImageComponent.cpp" />
     <ClCompile Include="MessageManager.cpp" />

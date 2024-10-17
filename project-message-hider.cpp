@@ -12,6 +12,7 @@
 #include "FontManager.h"
 #include "Theme.h"
 #include "ButtonComponent.h"
+#include "ButtonModeComponent.h"
 #include "TextComponent.h"
 #include "BoxComponent.h"
 #include "ImageComponent.h"
@@ -49,6 +50,7 @@ Theme theme;
 
 // State
 int state = 1;
+bool isLightMode = true;
 
 // Composants
 
@@ -67,10 +69,11 @@ static TextFieldComponent* encryptionTextField;
 // Title
 static TextComponent* titleText = nullptr;
 
-// TODO : TO REMOVE, TEST ONLY
+// Image
 static ImageComponent* uploadedImage = nullptr;
 static ImageComponent* previewImage = nullptr;
 
+// TODO : TO REMOVE, TEST ONLY
 static ButtonComponent* btnTest = nullptr;
 static ButtonComponent* encryptBtn = nullptr;
 static ButtonComponent* decryptBtn = nullptr;
@@ -79,6 +82,7 @@ static ButtonComponent* decryptBtn = nullptr;
 static ButtonComponent* btnSubmit = nullptr;
 static ButtonComponent* btnReset= nullptr;
 static ButtonComponent* btnDownload= nullptr;
+static ButtonModeComponent* btnToggleMode = nullptr;
 
 // Step 1
 static BoxComponent* step1Box = nullptr;
@@ -126,7 +130,7 @@ void CreateDragAndDropArea()
     dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
     dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
     
-    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 231, theme.GetColor(950));
+    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 231, 950);
 }
 
 void DrawDragAndDropArea(HDC hdc)
@@ -146,7 +150,7 @@ void DrawDragAndDropArea(HDC hdc)
     DeleteObject(hPen);
 
     if (dragAndDropAreaText) {
-        dragAndDropAreaText->Draw(hdc);
+        dragAndDropAreaText->Draw(hdc, theme.GetColor(dragAndDropAreaText->GetColorID()));
     }
 }
 
@@ -166,18 +170,18 @@ static void UpdateState(HWND hWnd, int newState)
     {
     case 1:
         // Counter
-        counter1Box->SetColor(hWnd, theme.GetColor(800));
-        counter2Box->SetColor(hWnd, theme.GetColor(300));
-        counter3Box->SetColor(hWnd, theme.GetColor(300));
+        counter1Box->SetColor(hWnd, 800);
+        counter2Box->SetColor(hWnd, 300);
+        counter3Box->SetColor(hWnd, 300);
 
         // Steps
-		step1Box->SetColor(hWnd, theme.GetColor(900));
-		step2Box->SetColor(hWnd, theme.GetColor(200));
-		step3Box->SetColor(hWnd, theme.GetColor(200));
+		step1Box->SetColor(hWnd, 900);
+		step2Box->SetColor(hWnd, 200);
+		step3Box->SetColor(hWnd, 200);
 
-        step1Text->SetColor(hWnd, theme.GetColor(50));
-        step2Text->SetColor(hWnd, theme.GetColor(950));
-        step3Text->SetColor(hWnd, theme.GetColor(950));
+        step1Text->SetColor(hWnd, 50);
+        step2Text->SetColor(hWnd, 950);
+        step3Text->SetColor(hWnd, 950);
 
 		delete step1IconDark;
 		delete step3IconLight;
@@ -191,18 +195,18 @@ static void UpdateState(HWND hWnd, int newState)
         break;
     case 2:
         // Counter
-		counter1Box->SetColor(hWnd, theme.GetColor(300));
-        counter2Box->SetColor(hWnd, theme.GetColor(800));
-        counter3Box->SetColor(hWnd, theme.GetColor(300));
+		counter1Box->SetColor(hWnd, 300);
+        counter2Box->SetColor(hWnd, 800);
+        counter3Box->SetColor(hWnd, 300);
 
         // Steps
-        step1Box->SetColor(hWnd, theme.GetColor(200));
-        step2Box->SetColor(hWnd, theme.GetColor(900));
-        step3Box->SetColor(hWnd, theme.GetColor(200));
+        step1Box->SetColor(hWnd, 200);
+        step2Box->SetColor(hWnd, 900);
+        step3Box->SetColor(hWnd, 200);
 
-		step1Text->SetColor(hWnd, theme.GetColor(950));
-		step2Text->SetColor(hWnd, theme.GetColor(50));
-		step3Text->SetColor(hWnd, theme.GetColor(950));
+		step1Text->SetColor(hWnd, 950);
+		step2Text->SetColor(hWnd, 50);
+		step3Text->SetColor(hWnd, 950);
 
 		delete step1IconLight;
 		delete step2IconDark;
@@ -216,18 +220,18 @@ static void UpdateState(HWND hWnd, int newState)
         break;
     case 3:
         // Counter
-        counter1Box->SetColor(hWnd, theme.GetColor(300));
-        counter2Box->SetColor(hWnd, theme.GetColor(300));
-        counter3Box->SetColor(hWnd, theme.GetColor(800));
+        counter1Box->SetColor(hWnd, 300);
+        counter2Box->SetColor(hWnd, 300);
+        counter3Box->SetColor(hWnd, 800);
 
         // Steps
-		step1Box->SetColor(hWnd, theme.GetColor(200));
-		step2Box->SetColor(hWnd, theme.GetColor(200));
-		step3Box->SetColor(hWnd, theme.GetColor(900));
+		step1Box->SetColor(hWnd, 200);
+		step2Box->SetColor(hWnd, 200);
+		step3Box->SetColor(hWnd, 900);
 
-        step1Text->SetColor(hWnd, theme.GetColor(950));
-        step2Text->SetColor(hWnd, theme.GetColor(950));
-        step3Text->SetColor(hWnd, theme.GetColor(50));
+        step1Text->SetColor(hWnd, 950);
+        step2Text->SetColor(hWnd, 950);
+        step3Text->SetColor(hWnd, 50);
 
 		delete step3IconDark;
 		delete step2IconLight;
@@ -360,38 +364,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DragAcceptFiles(hWnd, TRUE);
 
             // TEST ONLY
-            btnTest = new ButtonComponent(1776, 48, 96, 36, 1, true);
+            btnTest = new ButtonComponent(1776, 150, 96, 36, 1, true);
             encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
+
+			// Buttons
+			btnToggleMode = new ButtonModeComponent(1776, 48, 96, 36, 1, 300, 900);
             
             // Counter
-            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(600));
-            counter1Box = new BoxComponent(48, 48, theme.GetColor(800));
-            counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
-            counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
+            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, 600);
+            counter1Box = new BoxComponent(48, 48, 800);
+            counter2Box = new BoxComponent(100, 48, 300);
+            counter3Box = new BoxComponent(152, 48, 300);
 
             // Title
-            titleText = new TextComponent(fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, theme.GetColor(950));
+            titleText = new TextComponent(fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, 950);
 
             // Step1
-            step1Box = new BoxComponent(48, 293, theme.GetColor(900));
-            step1Text = new TextComponent(fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 169, 422, 334, theme.GetColor(50));
+            step1Box = new BoxComponent(48, 293, 900);
+            step1Text = new TextComponent(fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 169, 422, 334, 50);
             step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
 
 			// Step2
-            step2Box = new BoxComponent(672, 293, theme.GetColor(200));
-            step2Text = new TextComponent(fontManager.GetFontLarge(), L"2. Hide or extract the message.", 821, 422, 278, theme.GetColor(950));
+            step2Box = new BoxComponent(672, 293, 200);
+            step2Text = new TextComponent(fontManager.GetFontLarge(), L"2. Hide or extract the message.", 821, 422, 278, 950);
             step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
 
             // Step3
-            step3Box = new BoxComponent(1296, 293, theme.GetColor(200));
-            step3Text = new TextComponent(fontManager.GetFontLarge(), L"3. Check the result.", 1496, 422, 176, theme.GetColor(950));
+            step3Box = new BoxComponent(1296, 293, 200);
+            step3Text = new TextComponent(fontManager.GetFontLarge(), L"3. Check the result.", 1496, 422, 176, 950);
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
             // encryption
-            encryptionBox = new BoxComponent(48, 550, theme.GetColor(200));
-            encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
+            encryptionBox = new BoxComponent(48, 550, 200);
+            encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334, 950);
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
-            encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
+            encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, 950);
             encryptionTextField->Hide();
 
 			// Drag and Drop Area
@@ -472,6 +479,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			state >= 3 ? newState = 1 : newState = state + 1;
 			UpdateState(hWnd, newState);
         }
+		if (btnToggleMode && btnToggleMode->HitTest(LOWORD(lParam), HIWORD(lParam))) {
+            theme.ToggleMode();
+			btnToggleMode->MoveInnerRectangle(!btnToggleMode->GetIsOn());
+            InvalidateRect(hWnd, NULL, TRUE);
+		}
 
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
             encryptBtn->OnClick();
@@ -497,29 +509,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBrush);
 
             // Counter
-			if(counter1Box) counter1Box->Draw(hdc, 48, 8);
-			if(counter2Box) counter2Box->Draw(hdc, 48, 8);
-			if(counter3Box) counter3Box->Draw(hdc, 48, 8);
-			if(counterText) counterText->Draw(hdc);
+			if(counter1Box) counter1Box->Draw(hdc, 48, 8, theme.GetColor(counter1Box->GetColorID()));
+            if (counter2Box) counter2Box->Draw(hdc, 48, 8, theme.GetColor(counter2Box->GetColorID()));
+			if(counter3Box) counter3Box->Draw(hdc, 48, 8, theme.GetColor(counter3Box->GetColorID()));
+			if(counterText) counterText->Draw(hdc, theme.GetColor(counterText->GetColorID()));
 
             //Text
-            if (titleText) titleText->Draw(hdc);
+            if (titleText) titleText->Draw(hdc, theme.GetColor(titleText->GetColorID()));
 
             // Step 1
-			if (step1Box) step1Box->Draw(hdc, 576, 200);
-			if (step1Text) step1Text->Draw(hdc);
+			if (step1Box) step1Box->Draw(hdc, 576, 200, theme.GetColor(step1Box->GetColorID()));
+			if (step1Text) step1Text->Draw(hdc, theme.GetColor(step1Text->GetColorID()));
 			if (step1IconLight) step1IconLight->Draw(hdc);
 			if (step1IconDark) step1IconDark->Draw(hdc);
 			
 			// Step 2
-			if (step2Box) step2Box->Draw(hdc, 576, 200);
-			if (step2Text) step2Text->Draw(hdc);
+			if (step2Box) step2Box->Draw(hdc, 576, 200, theme.GetColor(step2Box->GetColorID()));
+			if (step2Text) step2Text->Draw(hdc, theme.GetColor(step2Text->GetColorID()));
 			if (step2IconLight) step2IconLight->Draw(hdc);
 			if (step2IconDark) step2IconDark->Draw(hdc);
             
             // Step 3
-			if (step3Box) step3Box->Draw(hdc, 576, 200);
-			if (step3Text) step3Text->Draw(hdc);
+			if (step3Box) step3Box->Draw(hdc, 576, 200, theme.GetColor(step3Box->GetColorID()));
+			if (step3Text) step3Text->Draw(hdc, theme.GetColor(step3Text->GetColorID()));
 			if (step3IconLight) step3IconLight->Draw(hdc);
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
@@ -529,18 +541,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // encryption
             if (state == 2) {
-                encryptionBox->Draw(hdc, 576, 400);
-                encryptionText->Draw(hdc);
+                encryptionBox->Draw(hdc, 576, 400, theme.GetColor(encryptionBox->GetColorID()));
+                encryptionText->Draw(hdc, theme.GetColor(encryptionText->GetColorID()));
                 if (!IsWindowVisible(encryptionTextField->GetHandle()))
                     encryptionTextField->Draw();
                 encryptionLabelText->SetText(hWnd, encryptionTextField->UpdateCharCount());
-                encryptionLabelText->Draw(hdc);
+                encryptionLabelText->Draw(hdc, theme.GetColor(encryptionLabelText->GetColorID()));
                 encryptBtn->Draw(hdc, L"Submit");
             }
             if (state == 1)
                 DrawDragAndDropArea(hdc);
     
             // Buttons
+            // Buttons
+            if(btnToggleMode) btnToggleMode->Draw(hdc, theme.GetColor(btnToggleMode->GetOutRectColorID()), theme.GetColor(btnToggleMode->GetInRectColorID()));
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
 
             EndPaint(hWnd, &ps);

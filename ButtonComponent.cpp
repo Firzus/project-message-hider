@@ -38,5 +38,4 @@ void ButtonComponent::OnClick() {
 void ButtonComponent::SetStyle(HWND hWnd, bool isPrimary)
 {
 	this->isPrimary = isPrimary;
-    InvalidateRect(hWnd, NULL, TRUE);
 }

@@ -17,11 +17,18 @@ Theme::Theme()
 
 Theme::~Theme() {}
 
-void Theme::AddColor(int index, COLORREF color) {
-    colorPalette[index] = color;
+// Méthode pour obtenir une couleur par index
+COLORREF Theme::GetColor(int index) {
+    if (colorPalette.find(index) != colorPalette.end()) {
+        return colorPalette[index];
+    }
+    else {
+        // Retourner une valeur par défaut (rouge) si l'index n'existe pas pour debug
+        return RGB(255, 10, 10);
+    }
 }
 
-void Theme::InvertColors() {
+void Theme::ToggleMode() {
     // Créer une copie de la palette actuelle pour faciliter l'inversion
     std::map<int, COLORREF> tempPalette = colorPalette;
 
@@ -37,15 +44,4 @@ void Theme::InvertColors() {
     colorPalette[800] = tempPalette[200];
     colorPalette[900] = tempPalette[100];
     colorPalette[950] = tempPalette[50];
-}
-
-// Méthode pour obtenir une couleur par index
-COLORREF Theme::GetColor(int index) {
-    if (colorPalette.find(index) != colorPalette.end()) {
-        return colorPalette[index];
-    }
-    else {
-        // Retourner une valeur par défaut (rouge) si l'index n'existe pas
-        return RGB(255, 10, 10);
-    }
 }
