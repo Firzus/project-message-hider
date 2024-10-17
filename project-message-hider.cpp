@@ -496,9 +496,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Nouveau calcul de la position X pour que la preview soit toujours alignée
             uploadedImagePosX = 1920 - 48 - imageSize;
 
-            downloadEncryptBox = new BoxComponent(48, 550, theme.GetColor(200));
-            downloadEncryptText = new TextComponent(fontManager.GetFontLarge(), L"Image", 90, 590, 334, theme.GetColor(950));
-            downloadMessageText = new TextComponent(fontManager.GetFontLarge(), L"Message", 680, 590, 334, theme.GetColor(950));
+            downloadEncryptBox = new BoxComponent(48, 550, 200);
+            downloadEncryptText = new TextComponent(fontManager.GetFontSubtitle(), L"Image", 96, 589, 72, 950);
+            downloadMessageText = new TextComponent(fontManager.GetFontSubtitle(), L"Message", 774, 589, 106, 950);
 
 			// Drag and Drop Area
             previewImage = new ImageComponent(PREVIEW_IMAGE, uploadedImagePosX, 541, imageSize, imageSize);
@@ -597,7 +597,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             InvalidateRect(hWnd, NULL, TRUE);
             ReleaseDC(hWnd, hdc);
         }
-
         if (downloadEncryptBtn && downloadEncryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadEncryptBtn->GetId() == 4) {
             if (encryptedFilePath != L"")
             {
@@ -607,12 +606,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else
                 MessageBox(NULL, L"No encrypted file found", L"Notification", MB_OK);
         }
-
         if (downloadDecryptBtn && downloadDecryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadDecryptBtn->GetId() == 5) {
             if (decryptedFilePath != L"") 
                 MessageBox(NULL, (L"Your extracted message file can be found at " + decryptedFilePath).c_str(), L"Notification", MB_OK);
             else
                 MessageBox(NULL, L"No message file found", L"Notification", MB_OK);
+        }
+        if (btnReset1 && btnReset1->HitTest(LOWORD(lParam), HIWORD(lParam)) || btnReset2 && btnReset2->HitTest(LOWORD(lParam), HIWORD(lParam)))
+        {
+            UpdateState(hWnd, 1);
         }
     } break;
     // Dessine la fenêtre et son contenu
