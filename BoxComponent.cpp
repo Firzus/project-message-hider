@@ -1,7 +1,7 @@
 #include "BoxComponent.h"
 
-BoxComponent::BoxComponent(int posX, int posY, COLORREF fillColor) :
-	posX(posX), posY(posY), fillColor(fillColor) {}
+BoxComponent::BoxComponent(int posX, int posY, COLORREF initialFillColor) :
+	posX(posX), posY(posY), fillColor(initialFillColor) {}
 
 BoxComponent::~BoxComponent() {}
 
@@ -31,10 +31,4 @@ void BoxComponent::Draw(HDC hdc, int width, int height)
 
 void BoxComponent::SetColor(HWND hWnd, COLORREF newColor) {
 	fillColor = newColor;
-	InvalidateRect(hWnd, nullptr, TRUE);
-}
-
-void BoxComponent::DeleteBox(HWND hWnd)
-{
-	InvalidateRect(hWnd, nullptr, TRUE);
 }
