@@ -160,6 +160,76 @@ bool IsPointInRect(RECT rect, POINT pt)
         pt.y >= rect.top && pt.y <= rect.bottom);
 }
 
+static void ToggleIcon1Mode()
+{
+    if (step1IconLight)
+    {
+        delete step1IconLight;
+        step1IconLight = nullptr;
+    }
+    else
+    {
+        step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
+    }
+
+    if (step1IconDark)
+    {
+        delete step1IconDark;
+        step1IconDark = nullptr;
+    }
+    else
+    {
+        step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
+    }
+}
+
+static void ToggleIcon2Mode()
+{
+	if (step2IconLight)
+	{
+		delete step2IconLight;
+		step2IconLight = nullptr;
+	}
+	else
+	{
+		step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+	}
+
+	if (step2IconDark)
+	{
+		delete step2IconDark;
+		step2IconDark = nullptr;
+	}
+	else
+	{
+		step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
+	}
+}
+
+static void ToggleIcon3Mode()
+{
+	if (step3IconLight)
+	{
+		delete step3IconLight;
+		step3IconLight = nullptr;
+	}
+	else
+	{
+		step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+	}
+
+	if (step3IconDark)
+	{
+		delete step3IconDark;
+		step3IconDark = nullptr;
+	}
+	else
+	{
+		step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+	}
+}
+
+
 static void UpdateState(HWND hWnd, int newState)
 {
     if (newState != state && state == 2)
@@ -183,14 +253,8 @@ static void UpdateState(HWND hWnd, int newState)
         step2Text->SetColor(hWnd, 950);
         step3Text->SetColor(hWnd, 950);
 
-		delete step1IconDark;
-		delete step3IconLight;
-
-		step1IconDark = nullptr;
-		step3IconLight = nullptr;
-
-		step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
-		step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+        ToggleIcon1Mode();
+        ToggleIcon3Mode();
 
         break;
     case 2:
@@ -208,14 +272,8 @@ static void UpdateState(HWND hWnd, int newState)
 		step2Text->SetColor(hWnd, 50);
 		step3Text->SetColor(hWnd, 950);
 
-		delete step1IconLight;
-		delete step2IconDark;
-
-        step1IconLight = nullptr;
-		step2IconDark = nullptr;
-
-        step1IconDark = new ImageComponent(ICON_INPUT_DARK, 312, 342, 48, 48);
-        step2IconLight = new ImageComponent(ICON_SET_LIGHT, 936, 342, 48, 48);
+        ToggleIcon1Mode();
+        ToggleIcon2Mode();
 
         break;
     case 3:
@@ -233,14 +291,8 @@ static void UpdateState(HWND hWnd, int newState)
         step2Text->SetColor(hWnd, 950);
         step3Text->SetColor(hWnd, 50);
 
-		delete step3IconDark;
-		delete step2IconLight;
-
-        step3IconDark = nullptr;
-		step2IconLight = nullptr;
-
-        step2IconDark = new ImageComponent(ICON_SET_DARK, 936, 342, 48, 48);
-        step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
+        ToggleIcon2Mode();
+        ToggleIcon3Mode();
 
         break;
     }
@@ -481,6 +533,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 		if (btnToggleMode && btnToggleMode->HitTest(LOWORD(lParam), HIWORD(lParam))) {
             theme.ToggleMode();
+            ToggleIcon1Mode();
+			ToggleIcon2Mode();
+			ToggleIcon3Mode();
 			btnToggleMode->MoveInnerRectangle(!btnToggleMode->GetIsOn());
             InvalidateRect(hWnd, NULL, TRUE);
 		}
