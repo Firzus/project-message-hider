@@ -5,12 +5,12 @@
 class ButtonComponent {
     int id, height, width, posY, posX;
     const wchar_t* text;
-    COLORREF bgColor, textColor;
+    COLORREF bgColorLight, bgColorDark, textColorLight, textColorDark;
 	bool isPrimary; // Style du bouton
 
 public:
     ButtonComponent(int x, int y, int width, int height, const wchar_t* text, int id);
-    void Draw(HDC hdc, COLORREF bgColor, COLORREF textColor);
+    void Draw(HDC hdc);
     bool HitTest(int mouseX, int mouseY) const;
     void OnClick();
     void DeleteButton(HWND hWnd);

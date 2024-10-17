@@ -276,7 +276,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     } break;
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
-        if (btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
+        if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
             btnTest->OnClick();
 			delete btnTest;
 			btnTest = nullptr;
@@ -324,7 +324,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3IconDark->Draw(hdc);
 
             // Buttons
-            if(btnTest) btnTest->Draw(hdc, theme.GetColor(900), theme.GetColor(50));
+            if(btnTest) btnTest->Draw(hdc);
 
             EndPaint(hWnd, &ps);
         }
