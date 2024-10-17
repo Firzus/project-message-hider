@@ -4,7 +4,7 @@
 bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::wstring& Message, HDC hdc)
 {
     // load the bmp file
-    HBITMAP hBitmap = GetBitMapFromPng(ImagePath.c_str(), hdc);  //(HBITMAP)LoadImage(NULL, ImagePath.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    HBITMAP hBitmap = GetBitMapFromImage(ImagePath.c_str(), hdc);  //(HBITMAP)LoadImage(NULL, ImagePath.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (!hBitmap) {
         OutputDebugStringA("Error while loading image\n");
         return false;
@@ -17,7 +17,9 @@ bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::wstri
         return false;
     }
     
-    if (!SaveBitmapAsPng(hBitmap, (ImagePath.substr(0, ImagePath.find('.')) + L"_encrypted.png"), hdc)) {
+    bool isPng = (ImagePath.find(L".png") != std::wstring::npos);
+    std::wstring outputPath = ImagePath.substr(0, ImagePath.find('.')) + (isPng ? L"_encrypted.png" : L"_encrypted.jpg");
+    if (!SaveBitmapAsImage(hBitmap, outputPath, hdc, isPng)) {
         OutputDebugStringA("Error while saving image.\n");
         return false;
     }
@@ -27,7 +29,7 @@ bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::wstri
 
 std::wstring MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
 {
-    HBITMAP hBitmap = GetBitMapFromPng(ImagePath.c_str(), hdc);
+    HBITMAP hBitmap = GetBitMapFromImage(ImagePath.c_str(), hdc);
     BITMAP bmp;
     std::vector<int> messageBits;
     BYTE* pixels;
@@ -103,7 +105,7 @@ bool MessageManager::SaveMessage(HBITMAP HBitmap, BITMAP& Bmp, const std::vector
     return true;
 }
 
-HBITMAP MessageManager::GetBitMapFromPng(LPCWSTR filePath, HDC hdc)
+HBITMAP MessageManager::GetBitMapFromImage(LPCWSTR filePath, HDC hdc)
 {
     // Créer un objet WIC
     IWICImagingFactory* pFactory = nullptr;
@@ -112,7 +114,11 @@ HBITMAP MessageManager::GetBitMapFromPng(LPCWSTR filePath, HDC hdc)
 
     // Charger l'image PNG
     IWICBitmapDecoder* pDecoder = nullptr;
-    pFactory->CreateDecoderFromFilename(filePath, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder);
+    HRESULT hr = pFactory->CreateDecoderFromFilename(filePath, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder);
+    if (FAILED(hr)) {
+        OutputDebugStringA("Error while loading image\n");
+        return nullptr;
+    }
 
     // Obtenir le frame de l'image
     IWICBitmapFrameDecode* pFrame = nullptr;
@@ -150,13 +156,13 @@ HBITMAP MessageManager::GetBitMapFromPng(LPCWSTR filePath, HDC hdc)
     return hTempBitmap;
 }
 
-bool MessageManager::SaveBitmapAsPng(HBITMAP hBitmap, const std::wstring& outputPath, HDC hdc)
+bool MessageManager::SaveBitmapAsImage(HBITMAP hBitmap, const std::wstring& outputPath, HDC hdc, bool isPng)
 {
     IWICImagingFactory* pFactory = nullptr;
     CoInitialize(nullptr);
     CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFactory));
 
-    IWICBitmap* pWicBitmap = nullptr;
+    //IWICBitmap* pWicBitmap = nullptr;
     IWICBitmapEncoder* pEncoder = nullptr;
     IWICBitmapFrameEncode* pFrameEncode = nullptr;
     IWICStream* pStream = nullptr;
@@ -167,18 +173,41 @@ bool MessageManager::SaveBitmapAsPng(HBITMAP hBitmap, const std::wstring& output
     hr = pStream->InitializeFromFilename(outputPath.c_str(), GENERIC_WRITE);
     if (FAILED(hr))
         return false;
-    hr = pFactory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &pEncoder);
+    
+    GUID containerFormat = isPng ? GUID_ContainerFormatPng : GUID_ContainerFormatJpeg;
+    hr = pFactory->CreateEncoder(containerFormat, nullptr, &pEncoder);
+    
+    
     if (FAILED(hr))
         return false;
     hr = pEncoder->Initialize(pStream, WICBitmapEncoderNoCache);
     if (FAILED(hr))
         return false;
-    hr = pEncoder->CreateNewFrame(&pFrameEncode, nullptr);
+    IPropertyBag2 * pPropertyBag = nullptr;
+    hr = pEncoder->CreateNewFrame(&pFrameEncode, &pPropertyBag);
     if (FAILED(hr))
         return false;
-    hr = pFrameEncode->Initialize(nullptr);
+
+    if (!isPng) {
+        PROPBAG2 option = { 0 };
+        option.pstrName = const_cast<LPOLESTR>(L"ImageQuality");
+        VARIANT varValue;
+        VariantInit(&varValue);
+        varValue.vt = VT_R4;
+        varValue.fltVal = 0.95f;
+
+        hr = pPropertyBag->Write(1, &option, &varValue);
+        VariantClear(&varValue);
+        if (FAILED(hr)) {
+            pPropertyBag->Release();
+            return false;
+        }
+    }
+    hr = pFrameEncode->Initialize(pPropertyBag);
+    if (pPropertyBag)
+        pPropertyBag->Release();
     if (FAILED(hr))
-        return false;
+         return false;
     BITMAP bmp;
     GetObject(hBitmap, sizeof(BITMAP), &bmp);
     UINT width = bmp.bmWidth;

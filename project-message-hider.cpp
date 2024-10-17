@@ -517,7 +517,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
             if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str())) {
                 std::wstring path = uploadedImage->GetImagePath();
-                encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
+                bool isPng = (path.find(L".png") != std::wstring::npos);
+                encryptedFilePath = path.substr(0, path.find('.')) + (isPng ? L"_encrypted.png" : L"_encrypted.jpg");
+                //encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
                 if (messManager.HideMessage(path, (encryptionTextField->GetText().c_str()), hdc))
                     MessageBox(NULL, L"Encryption succeeded !", L"Notification", MB_OK);
                     //MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
