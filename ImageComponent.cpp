@@ -140,8 +140,6 @@ void ImageComponent::PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath)
 
 }
 
-
-
 void ImageComponent::Draw(HDC hdc) {
     if (image) {
         Gdiplus::Graphics graphics(hdc);
