@@ -574,43 +574,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             InvalidateRect(hWnd, NULL, TRUE);
 		}
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
-            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str())) {
-                std::wstring path = uploadedImage->GetImagePath();
-                encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
-            } else 
-                MessageBox(NULL, L"Encryption failed !", L"Notification", MB_OK);
             LaunchNextButton();
             UpdateState(hWnd, 3);
             InvalidateRect(hWnd, NULL, TRUE);
             ReleaseDC(hWnd, hdc);
         }
         if (decryptBtn && decryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && decryptBtn->GetId() == 3) {
-            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str()))
-            {
-                decryptedFilePath = messManager.GetMessage(uploadedImage->GetImagePath(), hdc).c_str();
-                OutputDebugString(decryptedFilePath.c_str());
-                MessageBox(NULL, L"Decryption succeeded !", L"Notification", MB_OK);
-            } else  
-                MessageBox(NULL, L"Decryption failed !", L"Notification", MB_OK);
             LaunchNextButton();
             UpdateState(hWnd, 3);
             InvalidateRect(hWnd, NULL, TRUE);
             ReleaseDC(hWnd, hdc);
         }
         if (downloadEncryptBtn && downloadEncryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadEncryptBtn->GetId() == 4) {
-            if (encryptedFilePath != L"")
-            {
-                messManager.HideMessage(uploadedImage->GetImagePath(), (encryptionTextField->GetText().c_str()), hdc);
-                MessageBox(NULL, (L"Your encrypted file can be found at " + encryptedFilePath).c_str(), L"Notification", MB_OK);
+            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str())) {
+                std::wstring path = uploadedImage->GetImagePath();
+                encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
+                if (messManager.HideMessage(uploadedImage->GetImagePath(), (encryptionTextField->GetText().c_str()), hdc))
+                    MessageBox(NULL, (L"Your encrypted file can be found at " + encryptedFilePath).c_str(), L"Notification", MB_OK);
+
+                else
+                    MessageBox(NULL, L"Encryption failed !", L"Notification", MB_OK);
             }
-            else
-                MessageBox(NULL, L"No encrypted file found", L"Notification", MB_OK);
         }
         if (downloadDecryptBtn && downloadDecryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadDecryptBtn->GetId() == 5) {
-            if (decryptedFilePath != L"") 
+            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str()))
+            {
+                decryptedFilePath = messManager.GetMessage(uploadedImage->GetImagePath(), hdc).c_str();
                 MessageBox(NULL, (L"Your extracted message file can be found at " + decryptedFilePath).c_str(), L"Notification", MB_OK);
-            else
-                MessageBox(NULL, L"No message file found", L"Notification", MB_OK);
+            } else
+                MessageBox(NULL, L"Decryption failed !", L"Notification", MB_OK);
         }
         if (btnReset1 && btnReset1->HitTest(LOWORD(lParam), HIWORD(lParam)) || btnReset2 && btnReset2->HitTest(LOWORD(lParam), HIWORD(lParam)))
         {
