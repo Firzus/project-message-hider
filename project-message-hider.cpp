@@ -183,6 +183,9 @@ static void UpdateState(HWND hWnd, int newState)
     switch (state)
     {
     case 1:
+        // Autorise le drag-and-drop dans la fenêtre
+        DragAcceptFiles(hWnd, TRUE);
+
         // Counter
         counter1Box->SetColor(hWnd, theme.GetColor(800));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
@@ -208,6 +211,9 @@ static void UpdateState(HWND hWnd, int newState)
 
         break;
     case 2:
+        // Désactive le drag-and-drop dans la fenêtre
+        DragAcceptFiles(hWnd, FALSE);
+
         // Counter
 		counter1Box->SetColor(hWnd, theme.GetColor(300));
         counter2Box->SetColor(hWnd, theme.GetColor(800));
@@ -233,6 +239,9 @@ static void UpdateState(HWND hWnd, int newState)
 
         break;
     case 3:
+        // Désactive le drag-and-drop dans la fenêtre
+        DragAcceptFiles(hWnd, FALSE);
+
         // Counter
         counter1Box->SetColor(hWnd, theme.GetColor(300));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
@@ -452,45 +461,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // Est appelé quand on glisse un fichier sur la fenêtre
     case WM_DROPFILES:
     {
-        HDROP hDrop = (HDROP)wParam;
-
-        // Récupère la position du curseur lors du dépôt
-        POINT pt;
-        DragQueryPoint(hDrop, &pt);
-
-        // Convertit la position du point à l'échelle de la fenêtre
-        ScreenToClient(hWnd, &pt);
-
-        // Vérifie si le curseur est dans la zone de drag and drop définie
-        if (IsPointInRect(dragDropArea, pt))
+        if (state == 1)
         {
-            // Récupère le chemin du premier fichier déposé
-            wchar_t filePath[MAX_PATH];
-            if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
+            HDROP hDrop = (HDROP)wParam;
+
+            // Récupère la position du curseur lors du dépôt
+            POINT pt;
+            DragQueryPoint(hDrop, &pt);
+
+            // Convertit la position du point à l'échelle de la fenêtre
+            ScreenToClient(hWnd, &pt);
+
+            // Vérifie si le curseur est dans la zone de drag and drop définie
+            if (IsPointInRect(dragDropArea, pt))
             {
-				// Crée un nouvel objet ImageComponent
-				uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
-                //MessageBox(hWnd, uploadedImage->GetImagePath().c_str(), L"Erreur de format", MB_OK | MB_ICONERROR);
-                // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
-                if (!uploadedImage->IsValidFile(filePath))
+                // Récupère le chemin du premier fichier déposé
+                wchar_t filePath[MAX_PATH];
+                if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
                 {
-                    MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
-                    DragFinish(hDrop);
-                    break;
+                    // Crée un nouvel objet ImageComponent
+                    uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
+                    //MessageBox(hWnd, uploadedImage->GetImagePath().c_str(), L"Erreur de format", MB_OK | MB_ICONERROR);
+                    // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
+                    if (!uploadedImage->IsValidFile(filePath))
+                    {
+                        MessageBox(hWnd, L"Erreur : Format de fichier non valide.", L"Erreur de format", MB_OK | MB_ICONERROR);
+                        DragFinish(hDrop);
+                        break;
+                    }
+
+                    delete previewImage;
+                    previewImage = nullptr;
+                    UpdateState(hWnd, 2);
+
+                    InvalidateRect(hWnd, NULL, TRUE);
+
+                    ReleaseDC(hWnd, hdc);
                 }
-
-                delete previewImage;
-                previewImage = nullptr;
-                UpdateState(hWnd, 2);
-
-                InvalidateRect(hWnd, NULL, TRUE);
-
-                ReleaseDC(hWnd, hdc);
             }
-        }
 
-        // Libérer les ressources du drag-and-drop
-        DragFinish(hDrop);
+            // Libérer les ressources du drag-and-drop
+            DragFinish(hDrop);
+        }
+       
     } break;
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
