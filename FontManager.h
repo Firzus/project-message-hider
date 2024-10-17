@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <wtypes.h>
+#include <Windows.h>
 
 class FontManager
 {
