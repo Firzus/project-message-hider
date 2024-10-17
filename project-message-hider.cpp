@@ -115,15 +115,25 @@ void CreateDragAndDropArea()
 
 void DrawDragAndDropArea(HDC hdc)
 {
-    // Crée un stylo en pointillé
+    // Colore le background de la zone
+    HBRUSH hBrush = CreateSolidBrush(theme.GetColor(50));
+    FillRect(hdc, &dragDropArea, hBrush);
+
+    // Supprime la brosse utilisée pour éviter une fuite de mémoire
+    DeleteObject(hBrush);
+
+    // Crée un stylo en pointillé pour dessiner les bordures
     HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
     HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-    // Dessine le rectangle en pointillé pour délimiter la zone de drag-and-drop
+    // Dessine le cadre autour de la zone sans remplir
+    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, dragDropArea.left, dragDropArea.top, dragDropArea.right, dragDropArea.bottom);
 
-    // Restaure l'ancien stylo et supprime le stylo créé
+    // Restaure l'ancien stylo et brosse
     SelectObject(hdc, hOldPen);
+    SelectObject(hdc, hOldBrush);
+
     DeleteObject(hPen);
 
 	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc, fontManager.GetFontParagraph(), L"Drag and Drop the image here.", 278);
