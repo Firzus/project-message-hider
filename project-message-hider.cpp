@@ -218,7 +218,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
-            btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1);
+            btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
         }
         break;
 
