@@ -121,6 +121,7 @@ void LaunchNextButton();
 
 int imageSize;
 int uploadedImagePosX;
+int offsetBottom = 0;
 
 void CreateDragAndDropArea()
 {
@@ -438,8 +439,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DragAcceptFiles(hWnd, TRUE);
 
 			// Buttons
-            encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
-            decryptBtn = new ButtonComponent(680, 840, 96, 36, 3, true);
+            encryptBtn = new ButtonComponent(96, 877, 96, 36, 2, true);
+            decryptBtn = new ButtonComponent(774, 877, 96, 36, 3, true);
 			btnToggleMode = new ButtonModeComponent(1776, 48, 96, 36, 1, 300, 900);
             
             // Counter
@@ -467,11 +468,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
 
             // encryption
-            encryptionBox = new BoxComponent(48, 550, 200);
+            encryptionBox = new BoxComponent(48, 541, 200);
             encryptionText = new TextComponent(fontManager.GetFontSubtitle(), L"Hide a Message", 96, 589, 185, 950);
-            decryptionText = new TextComponent(fontManager.GetFontSubtitle(), L"Extract a Message", 738, 589, 215, 950);
-            encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
-            encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, 950);
+            decryptionText = new TextComponent(fontManager.GetFontSubtitle(), L"Extract a Message", 774, 589, 215, 950);
+            encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 96, 675, 300, 100);
+            encryptionLabelText = new TextComponent(fontManager.GetFontSmall(), encryptionTextField->UpdateCharCount(), 96, 642, 103, 950);
             encryptionTextField->Hide();
 
             // Image dimensions
@@ -659,7 +660,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (state == 1)
                 DrawDragAndDropArea(hdc);
             else if (state == 2) {
-                encryptionBox->Draw(hdc, 576, 400, theme.GetColor(encryptionBox->GetColorID()));
+                encryptionBox->Draw(hdc, 678, 420, theme.GetColor(encryptionBox->GetColorID()));
                 encryptionText->Draw(hdc, theme.GetColor(encryptionText->GetColorID()));
                 decryptionText->Draw(hdc, theme.GetColor(decryptionText->GetColorID()));
                 if (!IsWindowVisible(encryptionTextField->GetHandle()))
@@ -669,7 +670,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 encryptBtn->Draw(hdc, L"Submit");
                 decryptBtn->Draw(hdc, L"Submit");
             } else {
-                downloadEncryptBox->Draw(hdc, 576, 400, theme.GetColor(downloadEncryptBox->GetColorID()));
+                downloadEncryptBox->Draw(hdc, 678, 420, theme.GetColor(downloadEncryptBox->GetColorID()));
                 downloadEncryptText->Draw(hdc, theme.GetColor(downloadEncryptText->GetColorID()));
                 downloadMessageText->Draw(hdc, theme.GetColor(downloadMessageText->GetColorID()));
                 if (downloadDecryptBtn)
