@@ -720,9 +720,9 @@ void LaunchNextButton()
     encryptBtn = nullptr;
     delete decryptBtn;
     decryptBtn = nullptr;
-    downloadEncryptBtn = new ButtonComponent(96, 877, 96, 36, 4, true);
-    downloadDecryptBtn = new ButtonComponent(774, 877, 96, 36, 5, true);
+    downloadEncryptBtn = new ButtonComponent(96, 777, 96, 36, 4, true);
+    downloadDecryptBtn = new ButtonComponent(774, 777, 96, 36, 5, true);
 
-	btnReset1 = new ButtonComponent(200, 877, 96, 36, 6, false);
-    btnReset2 = new ButtonComponent(878, 877, 96, 36, 7, false);
+	btnReset1 = new ButtonComponent(200, 777, 96, 36, 6, false);
+    btnReset2 = new ButtonComponent(878, 777, 96, 36, 7, false);
 }
