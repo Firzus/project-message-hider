@@ -141,20 +141,13 @@ void CreateDragAndDropArea()
     dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
     dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
     
-    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and Drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 278, theme.GetColor(950));
+    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 231, theme.GetColor(950));
 }
 
 void DrawDragAndDropArea(HDC hdc)
 {
-    // Colore le background de la zone
-    HBRUSH hBrush = CreateSolidBrush(theme.GetColor(50));
-    FillRect(hdc, &dragDropArea, hBrush);
-
-    // Supprime la brosse utilisée pour éviter une fuite de mémoire
-    DeleteObject(hBrush);
-
     // Crée un stylo en pointillé pour dessiner les bordures
-    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
+    HPEN hPen = CreatePen(PS_DASH, 1, theme.GetColor(950));
     HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
     // Dessine le cadre autour de la zone sans remplir
@@ -167,7 +160,9 @@ void DrawDragAndDropArea(HDC hdc)
 
     DeleteObject(hPen);
 
-	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc);
+    if (dragAndDropAreaText) {
+        dragAndDropAreaText->Draw(hdc);
+    }
 }
 
 bool IsPointInRect(RECT rect, POINT pt)
@@ -186,7 +181,7 @@ static void UpdateState(HWND hWnd, int newState)
     {
     case 1:
         // Counter
-        counter1Box->SetColor(hWnd, theme.GetColor(900));
+        counter1Box->SetColor(hWnd, theme.GetColor(800));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
         counter3Box->SetColor(hWnd, theme.GetColor(300));
 
@@ -212,7 +207,7 @@ static void UpdateState(HWND hWnd, int newState)
     case 2:
         // Counter
 		counter1Box->SetColor(hWnd, theme.GetColor(300));
-        counter2Box->SetColor(hWnd, theme.GetColor(900));
+        counter2Box->SetColor(hWnd, theme.GetColor(800));
         counter3Box->SetColor(hWnd, theme.GetColor(300));
 
         // Steps
@@ -238,7 +233,7 @@ static void UpdateState(HWND hWnd, int newState)
         // Counter
         counter1Box->SetColor(hWnd, theme.GetColor(300));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
-        counter3Box->SetColor(hWnd, theme.GetColor(900));
+        counter3Box->SetColor(hWnd, theme.GetColor(800));
 
         // Steps
 		step1Box->SetColor(hWnd, theme.GetColor(200));
@@ -386,8 +381,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             
             
             // Counter
-            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(950));
-            counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
+            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(600));
+            counter1Box = new BoxComponent(48, 48, theme.GetColor(800));
             counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
             counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
 
@@ -395,7 +390,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             titleText = new TextComponent(fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, theme.GetColor(950));
 
             // Step1
-            step1Box = new BoxComponent(48, 293, theme.GetColor(800));
+            step1Box = new BoxComponent(48, 293, theme.GetColor(900));
             step1Text = new TextComponent(fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 169, 422, 334, theme.GetColor(50));
             step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
 
@@ -414,7 +409,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
             decryptionText = new TextComponent(fontManager.GetFontLarge(), L"Extract a Message", 680, 590, 334, theme.GetColor(950));
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
-            encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
+            encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
             encryptionTextField->Hide();
 
             downloadEncryptBox = new BoxComponent(48, 550, theme.GetColor(200));
@@ -470,9 +465,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 delete previewImage;
                 previewImage = nullptr;
+                UpdateState(hWnd, 2);
 
-				UpdateState(hWnd, 2);
                 InvalidateRect(hWnd, NULL, TRUE);
+
                 ReleaseDC(hWnd, hdc);
             }
         }
