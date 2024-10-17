@@ -92,6 +92,9 @@ int dNDCenterX;
 int dNDCenterY;
 int offsetX = -118;
 
+bool isAnImageUploaded = false;
+ImageComponent uploadedImage;
+
 void CreateDragAndDropArea()
 {
     // Calcul de la hauteur de la barre de titre
@@ -325,8 +328,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wchar_t filePath[MAX_PATH];
             if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
-                ImageComponent uploadedImage;
-
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                 if (!uploadedImage.IsValidFile(filePath))
                 {
@@ -347,7 +348,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 HDC hdc = GetDC(hWnd);
 
                 // Charge et affiche l'image dans la fenêtre
-                uploadedImage.PaintImage(hdc, hWnd, filePath);
+                uploadedImage.LoadAndDrawImage(hdc, hWnd, filePath);
+                
+                isAnImageUploaded = true;
+
+
                 std::wstring path(filePath);
                 std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
                 if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
@@ -412,8 +417,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if(btnTest) btnTest->Draw(hdc, L"Click Me");
 
             // Preview image
-            ImageComponent previewImage;
-            previewImage.PaintImage(hdc, hWnd, PREVIEW_IMAGE);
+            if (isAnImageUploaded == false)
+            {
+                ImageComponent previewImage;
+                previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+            }
+            else
+            {
+                // Affiche à nouveau la même image
+                uploadedImage.DrawImage(hdc, hWnd);
+            }
 
             EndPaint(hWnd, &ps);
         }

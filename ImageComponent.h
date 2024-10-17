@@ -16,7 +16,8 @@ public:
     void SetImage(const std::wstring& imagePath);
 
     bool IsValidFile(LPCWSTR filePath);
-    void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
+    void LoadAndDrawImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
+    void DrawImage(HDC hdc, HWND hwnd);
     HBITMAP hBitmap;
 
 private:
