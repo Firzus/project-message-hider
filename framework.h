@@ -21,6 +21,7 @@
 #include <memory.h>
 #include <tchar.h>
 #include <string>
+#include <fstream> 
 #include <vector>
 #include <random>
 #include <stdlib.h>
