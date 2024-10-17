@@ -90,6 +90,9 @@ static ButtonComponent* decryptBtn = nullptr;
 static ButtonComponent* downloadEncryptBtn = nullptr;
 static ButtonComponent* downloadDecryptBtn = nullptr;
 
+static ButtonComponent* btnReset1 = nullptr;
+static ButtonComponent* btnReset2 = nullptr;
+
 static ButtonModeComponent* btnToggleMode = nullptr;
 
 // Step 1
@@ -271,6 +274,12 @@ static void UpdateState(HWND hWnd, int newState)
 
         ToggleIcon1Mode();
         ToggleIcon3Mode();
+
+        delete btnReset1;
+		btnReset1 = nullptr;
+
+		delete btnReset2;
+		btnReset2 = nullptr;
 
         break;
     case 2:
@@ -564,15 +573,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			btnToggleMode->MoveInnerRectangle(!btnToggleMode->GetIsOn());
             InvalidateRect(hWnd, NULL, TRUE);
 		}
-
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
             if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str())) {
                 std::wstring path = uploadedImage->GetImagePath();
                 encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
-                if (messManager.HideMessage(path, (encryptionTextField->GetText().c_str()), hdc))
-                    MessageBox(NULL, L"Encryption succeeded !", L"Notification", MB_OK);
-                    //MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                //OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
             } else 
                 MessageBox(NULL, L"Encryption failed !", L"Notification", MB_OK);
             LaunchNextButton();
@@ -596,7 +600,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         if (downloadEncryptBtn && downloadEncryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadEncryptBtn->GetId() == 4) {
             if (encryptedFilePath != L"")
+            {
+                messManager.HideMessage(uploadedImage->GetImagePath(), (encryptionTextField->GetText().c_str()), hdc);
                 MessageBox(NULL, (L"Your encrypted file can be found at " + encryptedFilePath).c_str(), L"Notification", MB_OK);
+            }
             else
                 MessageBox(NULL, L"No encrypted file found", L"Notification", MB_OK);
         }
@@ -672,10 +679,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 downloadEncryptBox->Draw(hdc, 678, 420, theme.GetColor(downloadEncryptBox->GetColorID()));
                 downloadEncryptText->Draw(hdc, theme.GetColor(downloadEncryptText->GetColorID()));
                 downloadMessageText->Draw(hdc, theme.GetColor(downloadMessageText->GetColorID()));
-                if (downloadDecryptBtn)
-                    downloadDecryptBtn->Draw(hdc, L"Download");
-                if (downloadEncryptBtn)
-                    downloadEncryptBtn->Draw(hdc, L"Download");
+                if (downloadDecryptBtn) downloadDecryptBtn->Draw(hdc, L"Download");
+                if (downloadEncryptBtn) downloadEncryptBtn->Draw(hdc, L"Download");
+                if (btnReset1) btnReset1->Draw(hdc, L"Reset");
+				if (btnReset2) btnReset2->Draw(hdc, L"Reset");
             }
 
             // Buttons
@@ -719,6 +726,9 @@ void LaunchNextButton()
     encryptBtn = nullptr;
     delete decryptBtn;
     decryptBtn = nullptr;
-    downloadEncryptBtn = new ButtonComponent(90, 730, 96, 36, 4, true);
-    downloadDecryptBtn = new ButtonComponent(680, 740, 96, 36, 5, true);
+    downloadEncryptBtn = new ButtonComponent(96, 877, 96, 36, 4, true);
+    downloadDecryptBtn = new ButtonComponent(774, 877, 96, 36, 5, true);
+
+	btnReset1 = new ButtonComponent(200, 877, 96, 36, 6, false);
+    btnReset2 = new ButtonComponent(878, 877, 96, 36, 7, false);
 }
