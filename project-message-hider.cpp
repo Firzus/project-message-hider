@@ -531,6 +531,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			state >= 3 ? newState = 1 : newState = state + 1;
 			UpdateState(hWnd, newState);
         }
+
 		if (btnToggleMode && btnToggleMode->HitTest(LOWORD(lParam), HIWORD(lParam))) {
             theme.ToggleMode();
             ToggleIcon1Mode();
