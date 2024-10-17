@@ -108,6 +108,8 @@ void CreateDragAndDropArea()
 
     dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
     dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
+    
+    dragAndDropAreaText = new TextComponent((dNDCenterX + offsetX), dNDCenterY, theme.GetColor(950));
 }
 
 void DrawDragAndDropArea(HDC hdc)
@@ -123,7 +125,7 @@ void DrawDragAndDropArea(HDC hdc)
     SelectObject(hdc, hOldPen);
     DeleteObject(hPen);
 
-    dragAndDropAreaText = new TextComponent(hdc, L"Drag and Drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 278, fontManager.GetFontLarge(), theme.GetColor(950));
+	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc, fontManager.GetFontParagraph(), L"Drag and Drop the image here.", 278);
 }
 
 bool IsPointInRect(RECT rect, POINT pt)
@@ -247,8 +249,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
-            CreateDragAndDropArea();
-
             // TEST ONLYs
             btnTest = new ButtonComponent(642, 802, 96, 36, L"Click Me", 1, true);
             
@@ -278,6 +278,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             step3Text = new TextComponent(1496, 422, theme.GetColor(950));
             step3IconLight = new ImageComponent(ICON_OUTPUT_LIGHT, 1560, 342, 48, 48);
             step3IconDark = new ImageComponent(ICON_OUTPUT_DARK, 1560, 342, 48, 48);
+
+			// Drag and Drop Area
+            CreateDragAndDropArea();
         }
         break;
 
@@ -339,26 +342,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
                 ReleaseDC(hWnd, hdc);
             }
-            
-            // Libérer la ressource précédente si une image était déjà chargée 
-            // (pour éviter des problèmes d'affichage non voulus)
-            if (uploadedImage.hBitmap)
-            {
-                DeleteObject(uploadedImage.hBitmap);
-                uploadedImage.hBitmap = NULL;
-            }
-
-            // Récupère la fenêtre actuelle
-            HDC hdc = GetDC(hWnd);
-
-            // Charge et affiche l'image dans la fenêtre
-            uploadedImage.PaintImage(hdc, hWnd, filePath);
-            std::wstring path(filePath);
-            std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-            if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-            OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
-            ReleaseDC(hWnd, hdc);
         }
 
         // Libérer les ressources du drag-and-drop
