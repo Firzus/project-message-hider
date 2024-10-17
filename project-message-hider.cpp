@@ -83,18 +83,13 @@ static TextComponent* titleText = nullptr;
 static ImageComponent* uploadedImage = nullptr;
 static ImageComponent* previewImage = nullptr;
 
-// TODO : TO REMOVE, TEST ONLY
-static ButtonComponent* btnTest = nullptr;
+// Buttons
 static ButtonComponent* encryptBtn = nullptr;
 static ButtonComponent* decryptBtn = nullptr;
 
 static ButtonComponent* downloadEncryptBtn = nullptr;
 static ButtonComponent* downloadDecryptBtn = nullptr;
 
-// Buttons
-static ButtonComponent* btnSubmit = nullptr;
-static ButtonComponent* btnReset= nullptr;
-static ButtonComponent* btnDownload= nullptr;
 static ButtonModeComponent* btnToggleMode = nullptr;
 
 // Step 1
@@ -442,13 +437,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Autorise le drag-and-drop dans la fenêtre
             DragAcceptFiles(hWnd, TRUE);
 
-            // TEST ONLY
-            btnTest = new ButtonComponent(1776, 150, 96, 36, 1, true);
-            encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
-
 			// Buttons
-			btnToggleMode = new ButtonModeComponent(1776, 48, 96, 36, 1, 300, 900);
+            encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
             decryptBtn = new ButtonComponent(680, 840, 96, 36, 3, true);
+			btnToggleMode = new ButtonModeComponent(1776, 48, 96, 36, 1, 300, 900);
             
             // Counter
             counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, 600);
@@ -476,8 +468,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // encryption
             encryptionBox = new BoxComponent(48, 550, 200);
-            encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334, 950);
-            decryptionText = new TextComponent(fontManager.GetFontLarge(), L"Extract a Message", 680, 590, 334, 950);
+            encryptionText = new TextComponent(fontManager.GetFontSubtitle(), L"Hide a Message", 96, 589, 185, 950);
+            decryptionText = new TextComponent(fontManager.GetFontSubtitle(), L"Extract a Message", 738, 589, 215, 950);
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
             encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, 950);
             encryptionTextField->Hide();
@@ -561,17 +553,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Libérer les ressources du drag-and-drop
             DragFinish(hDrop);
         }
-       
     } break;
     case WM_LBUTTONDOWN: {
         // Vérifier si le clic est à l'intérieur du bouton
-        if (btnTest && btnTest->HitTest(LOWORD(lParam), HIWORD(lParam)) && btnTest->GetId() == 1) {
-
-			int newState = 0;
-			state >= 3 ? newState = 1 : newState = state + 1;
-			UpdateState(hWnd, newState);
-        }
-
 		if (btnToggleMode && btnToggleMode->HitTest(LOWORD(lParam), HIWORD(lParam))) {
             theme.ToggleMode();
             ToggleIcon1Mode();
@@ -675,9 +659,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (state == 1)
                 DrawDragAndDropArea(hdc);
             else if (state == 2) {
-                encryptionBox->Draw(hdc, 576, 400);
-                encryptionText->Draw(hdc);
-                decryptionText->Draw(hdc);
+                encryptionBox->Draw(hdc, 576, 400, theme.GetColor(encryptionBox->GetColorID()));
+                encryptionText->Draw(hdc, theme.GetColor(encryptionText->GetColorID()));
+                decryptionText->Draw(hdc, theme.GetColor(decryptionText->GetColorID()));
                 if (!IsWindowVisible(encryptionTextField->GetHandle()))
                     encryptionTextField->Draw();
                 encryptionLabelText->SetText(hWnd, encryptionTextField->UpdateCharCount());
@@ -685,18 +669,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 encryptBtn->Draw(hdc, L"Submit");
                 decryptBtn->Draw(hdc, L"Submit");
             } else {
-                downloadEncryptBox->Draw(hdc, 576, 400);
-                downloadEncryptText->Draw(hdc);
-                downloadMessageText->Draw(hdc);
+                downloadEncryptBox->Draw(hdc, 576, 400, theme.GetColor(downloadEncryptBox->GetColorID()));
+                downloadEncryptText->Draw(hdc, theme.GetColor(downloadEncryptText->GetColorID()));
+                downloadMessageText->Draw(hdc, theme.GetColor(downloadMessageText->GetColorID()));
                 if (downloadDecryptBtn)
                     downloadDecryptBtn->Draw(hdc, L"Download");
                 if (downloadEncryptBtn)
                     downloadEncryptBtn->Draw(hdc, L"Download");
             }
-            // Buttons
+
             // Buttons
             if(btnToggleMode) btnToggleMode->Draw(hdc, theme.GetColor(btnToggleMode->GetOutRectColorID()), theme.GetColor(btnToggleMode->GetInRectColorID()));
-            if(btnTest) btnTest->Draw(hdc, L"Debug State");
             EndPaint(hWnd, &ps);
         }
         break;
