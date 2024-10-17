@@ -1,7 +1,7 @@
 #include "MessageManager.h"
 
 
-bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::string& Message, HDC hdc)
+bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::wstring& Message, HDC hdc)
 {
     // load the bmp file
     HBITMAP hBitmap = GetBitMapFromPng(ImagePath.c_str(), hdc);  //(HBITMAP)LoadImage(NULL, ImagePath.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -25,23 +25,23 @@ bool MessageManager::HideMessage(const std::wstring& ImagePath, const std::strin
     return true;
 }
 
-std::string MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
+std::wstring MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
 {
     HBITMAP hBitmap = GetBitMapFromPng(ImagePath.c_str(), hdc);
     BITMAP bmp;
     std::vector<int> messageBits;
     BYTE* pixels;
     int bitsPerPixel = 0;
-    std::string embededMessage = "";
+    std::wstring embededMessage = L"";
 
     if (!hBitmap) {
         OutputDebugStringA("Error while loading image\n");
-        return "";
+        return L"";
     }
     GetObject(hBitmap, sizeof(BITMAP), &bmp);
     if (bmp.bmBitsPixel != 24 && bmp.bmBitsPixel != 32) {
         OutputDebugStringA("Pixel size not valid use 24 or 32 pixel size\n");
-        return "";
+        return L"";
     }
     pixels = (BYTE*)bmp.bmBits;
     bitsPerPixel = bmp.bmBitsPixel / 8;
@@ -61,10 +61,10 @@ std::string MessageManager::GetMessage(const std::wstring& ImagePath, HDC hdc)
     }
 }
 
-std::vector<int> MessageManager::ConvertStringToBits(const std::string& Message)
+std::vector<int> MessageManager::ConvertStringToBits(const std::wstring& Message)
 {
     std::vector<int> messageBits;
-    std::string mess = Message + '\0';
+    std::wstring mess = Message + L'\0';
     for (int i = 0; i < mess.size(); i++)
         for (int j = 0; j < 8; j++)
             messageBits.push_back((mess[i] >> j) & 1);

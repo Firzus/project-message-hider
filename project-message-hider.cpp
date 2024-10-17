@@ -49,6 +49,8 @@ Theme theme;
 
 // State
 int state = 1;
+std::wstring encryptedFilePath = L"";
+std::wstring decryptedFilePath = L"";
 
 // Composants
 
@@ -59,12 +61,18 @@ static BoxComponent* counter2Box = nullptr;
 static BoxComponent* counter3Box = nullptr;
 
 // encryption
-static BoxComponent* encryptionBox;
-static TextComponent* encryptionText;
-static TextComponent* encryptionLabelText;
-static TextFieldComponent* encryptionTextField;
+static BoxComponent* encryptionBox = nullptr;
+static TextComponent* encryptionText = nullptr;
+static TextComponent* encryptionLabelText = nullptr;
+static TextFieldComponent* encryptionTextField = nullptr;
 
-static TextComponent* decryptionText;
+// encryption
+static BoxComponent* downloadEncryptBox = nullptr;
+static TextComponent* downloadEncryptText = nullptr;
+static TextComponent* downloadMessageText = nullptr;
+
+
+static TextComponent* decryptionText = nullptr;
 
 // Title
 static TextComponent* titleText = nullptr;
@@ -76,6 +84,9 @@ static ImageComponent* previewImage = nullptr;
 static ButtonComponent* btnTest = nullptr;
 static ButtonComponent* encryptBtn = nullptr;
 static ButtonComponent* decryptBtn = nullptr;
+
+static ButtonComponent* downloadEncryptBtn = nullptr;
+static ButtonComponent* downloadDecryptBtn = nullptr;
 
 // Buttons
 static ButtonComponent* btnSubmit = nullptr;
@@ -106,6 +117,8 @@ static TextComponent* dragAndDropAreaText;
 int dNDCenterX;
 int dNDCenterY;
 int offsetX = -118;
+
+void LaunchNextButton();
 
 void CreateDragAndDropArea()
 {
@@ -371,6 +384,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
             decryptBtn = new ButtonComponent(680, 840, 96, 36, 3, true);
             
+            
             // Counter
             counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(950));
             counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
@@ -402,6 +416,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
             encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
             encryptionTextField->Hide();
+
+            downloadEncryptBox = new BoxComponent(48, 550, theme.GetColor(200));
+            downloadEncryptText = new TextComponent(fontManager.GetFontLarge(), L"Image", 90, 590, 334, theme.GetColor(950));
+            downloadMessageText = new TextComponent(fontManager.GetFontLarge(), L"Message", 680, 590, 334, theme.GetColor(950));
 
 			// Drag and Drop Area
             previewImage = new ImageComponent(PREVIEW_IMAGE, 1381, 541, 463, 463);
@@ -441,7 +459,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
 				// Crée un nouvel objet ImageComponent
 				uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
-
+                //MessageBox(hWnd, uploadedImage->GetImagePath().c_str(), L"Erreur de format", MB_OK | MB_ICONERROR);
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                 if (!uploadedImage->IsValidFile(filePath))
                 {
@@ -454,19 +472,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 previewImage = nullptr;
 
 				UpdateState(hWnd, 2);
-
                 InvalidateRect(hWnd, NULL, TRUE);
-
-                // Récupère la fenêtre actuelle
-                HDC hdc = GetDC(hWnd);
-
-                std::wstring path(filePath);
-                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
-              
-
                 ReleaseDC(hWnd, hdc);
             }
         }
@@ -484,16 +490,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         if (encryptBtn && encryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && encryptBtn->GetId() == 2) {
-            encryptBtn->OnClick();
-            /*delete btnTest;
-            btnTest = nullptr;
-            btnTest->DeleteButton(hWnd);*/
+            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str())) {
+                std::wstring path = uploadedImage->GetImagePath();
+                encryptedFilePath = (path.substr(0, path.find('.')) + L"_encrypted.png");
+                if (messManager.HideMessage(path, (encryptionTextField->GetText().c_str()), hdc))
+                    MessageBox(NULL, L"Encryption succeeded !", L"Notification", MB_OK);
+                    //MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                //OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+            } else 
+                MessageBox(NULL, L"Encryption failed !", L"Notification", MB_OK);
+            LaunchNextButton();
+            UpdateState(hWnd, 3);
+            InvalidateRect(hWnd, NULL, TRUE);
+            ReleaseDC(hWnd, hdc);
         }
         if (decryptBtn && decryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && decryptBtn->GetId() == 3) {
-            decryptBtn->OnClick();
-            /*delete btnTest;
-            btnTest = nullptr;
-            btnTest->DeleteButton(hWnd);*/
+            if (uploadedImage && uploadedImage->IsValidFile(uploadedImage->GetImagePath().c_str()))
+            {
+                decryptedFilePath = messManager.GetMessage(uploadedImage->GetImagePath(), hdc).c_str();
+                OutputDebugString(decryptedFilePath.c_str());
+                MessageBox(NULL, L"Decryption succeeded !", L"Notification", MB_OK);
+            } else  
+                MessageBox(NULL, L"Decryption failed !", L"Notification", MB_OK);
+            LaunchNextButton();
+            UpdateState(hWnd, 3);
+            InvalidateRect(hWnd, NULL, TRUE);
+            ReleaseDC(hWnd, hdc);
+        }
+
+        if (downloadEncryptBtn && downloadEncryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadEncryptBtn->GetId() == 4) {
+            if (encryptedFilePath != L"")
+                MessageBox(NULL, (L"Your encrypted file can be found at " + encryptedFilePath).c_str(), L"Notification", MB_OK);
+            else
+                MessageBox(NULL, L"No encrypted file found", L"Notification", MB_OK);
+        }
+
+        if (downloadDecryptBtn && downloadDecryptBtn->HitTest(LOWORD(lParam), HIWORD(lParam)) && downloadDecryptBtn->GetId() == 5) {
+            if (decryptedFilePath != L"") 
+                MessageBox(NULL, (L"Your extracted message file can be found at " + decryptedFilePath).c_str(), L"Notification", MB_OK);
+            else
+                MessageBox(NULL, L"No message file found", L"Notification", MB_OK);
         }
     } break;
     // Dessine la fenêtre et son contenu
@@ -544,7 +580,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (uploadedImage) uploadedImage->Draw(hdc);
 
             // encryption
-            if (state == 2) {
+            if (state == 1)
+                DrawDragAndDropArea(hdc);
+            else if (state == 2) {
                 encryptionBox->Draw(hdc, 576, 400);
                 encryptionText->Draw(hdc);
                 decryptionText->Draw(hdc);
@@ -554,13 +592,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 encryptionLabelText->Draw(hdc);
                 encryptBtn->Draw(hdc, L"Submit");
                 decryptBtn->Draw(hdc, L"Submit");
+            } else {
+                downloadEncryptBox->Draw(hdc, 576, 400);
+                downloadEncryptText->Draw(hdc);
+                downloadMessageText->Draw(hdc);
+                if (downloadDecryptBtn)
+                    downloadDecryptBtn->Draw(hdc, L"Download");
+                if (downloadEncryptBtn)
+                    downloadEncryptBtn->Draw(hdc, L"Download");
             }
-            if (state == 1)
-                DrawDragAndDropArea(hdc);
-    
             // Buttons
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
-
             EndPaint(hWnd, &ps);
         }
         break;
@@ -592,4 +634,14 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void LaunchNextButton()
+{
+    delete encryptBtn;
+    encryptBtn = nullptr;
+    delete decryptBtn;
+    decryptBtn = nullptr;
+    downloadEncryptBtn = new ButtonComponent(90, 730, 96, 36, 4, true);
+    downloadDecryptBtn = new ButtonComponent(680, 740, 96, 36, 5, true);
 }
