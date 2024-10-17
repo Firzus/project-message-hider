@@ -400,6 +400,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionTextField->Hide();
 
 			// Drag and Drop Area
+            previewImage = new ImageComponent(PREVIEW_IMAGE, 1381, 541, 463, 463);
+
             CreateDragAndDropArea();
         }
         break;
@@ -433,6 +435,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wchar_t filePath[MAX_PATH];
             if (DragQueryFile(hDrop, 0, filePath, MAX_PATH))
             {
+				// Crée un nouvel objet ImageComponent
+				uploadedImage = new ImageComponent(filePath, 1381, 541, 463, 463);
+
                 // Si le fichier déposé n'est pas un fichier accepté, affiche un message d'erreur
                 if (!uploadedImage->IsValidFile(filePath))
                 {
@@ -441,33 +446,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
 
-                // Libérer la ressource précédente si une image était déjà chargée 
-                // (pour éviter des problèmes d'affichage non voulus)
-                if (uploadedImage->hBitmap)
-                {
-                    DeleteObject(uploadedImage->hBitmap);
-                    uploadedImage->hBitmap = NULL;
-                }
+                delete previewImage;
+                previewImage = nullptr;
+
+                InvalidateRect(hWnd, NULL, TRUE);
 
                 // Récupère la fenêtre actuelle
                 HDC hdc = GetDC(hWnd);
 
-                // Charge et affiche l'image dans la fenêtre
-                uploadedImage->LoadAndDrawImage(hdc, hWnd, filePath);
-
-                if (uploadedImage->GetIsAnImageLoaded())
-                {
-                    std::wstring path(filePath);
-                    std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-                    if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                        MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                    OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
-                }
-                else
-                {
-                    previewImage = new ImageComponent();
-                    previewImage->LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
-                }
+                std::wstring path(filePath);
+                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+              
 
                 ReleaseDC(hWnd, hdc);
             }
@@ -535,6 +527,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (step3IconLight) step3IconLight->Draw(hdc);
 			if (step3IconDark) step3IconDark->Draw(hdc);
 
+			// Preview image
+            if(previewImage) previewImage->Draw(hdc);
+			if (uploadedImage) uploadedImage->Draw(hdc);
+
             // encryption
             if (state == 2) {
                 encryptionBox->Draw(hdc, 576, 400);
@@ -550,18 +546,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     
             // Buttons
             if(btnTest) btnTest->Draw(hdc, L"Debug State");
-
-            // Preview image
-            if (uploadedImage.isAnImageLoaded == false)
-            {
-                ImageComponent previewImage;
-                previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
-            }
-            else
-            {
-                // Affiche à nouveau la même image
-                uploadedImage.DrawImage(hdc, hWnd);
-            }
 
             EndPaint(hWnd, &ps);
         }

@@ -6,8 +6,6 @@
 #pragma comment (lib,"Gdiplus.lib")
 
 class ImageComponent {
-    HBITMAP LoadPNGImage(LPCWSTR filePath);
-
 	const std::wstring& imagePath;
 
     Gdiplus::Image* image;
@@ -32,11 +30,8 @@ public:
     ~ImageComponent();
 
     void Draw(HDC hdc);
-    void DrawImage(HDC hdc, HWND hwnd);
-    void LoadAndDrawImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
     void CalculatePreviewDimensions();
     bool IsValidFile(LPCWSTR filePath);
-    void PaintImage(HDC hdc, HWND hwnd, LPCWSTR filePath);
     HBITMAP hBitmap;
 
 	// Getters
