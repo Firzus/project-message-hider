@@ -171,7 +171,7 @@ static void UpdateState(HWND hWnd, int newState)
     {
     case 1:
         // Counter
-        counter1Box->SetColor(hWnd, theme.GetColor(900));
+        counter1Box->SetColor(hWnd, theme.GetColor(800));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
         counter3Box->SetColor(hWnd, theme.GetColor(300));
 
@@ -197,7 +197,7 @@ static void UpdateState(HWND hWnd, int newState)
     case 2:
         // Counter
 		counter1Box->SetColor(hWnd, theme.GetColor(300));
-        counter2Box->SetColor(hWnd, theme.GetColor(900));
+        counter2Box->SetColor(hWnd, theme.GetColor(800));
         counter3Box->SetColor(hWnd, theme.GetColor(300));
 
         // Steps
@@ -223,7 +223,7 @@ static void UpdateState(HWND hWnd, int newState)
         // Counter
         counter1Box->SetColor(hWnd, theme.GetColor(300));
         counter2Box->SetColor(hWnd, theme.GetColor(300));
-        counter3Box->SetColor(hWnd, theme.GetColor(900));
+        counter3Box->SetColor(hWnd, theme.GetColor(800));
 
         // Steps
 		step1Box->SetColor(hWnd, theme.GetColor(200));
@@ -369,8 +369,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptBtn = new ButtonComponent(90, 830, 96, 36, 2, true);
             
             // Counter
-            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(950));
-            counter1Box = new BoxComponent(48, 48, theme.GetColor(900));
+            counterText = new TextComponent(fontManager.GetFontMuted(), std::to_wstring(state) + L" of 3", 48, 64, 37, theme.GetColor(600));
+            counter1Box = new BoxComponent(48, 48, theme.GetColor(800));
             counter2Box = new BoxComponent(100, 48, theme.GetColor(300));
             counter3Box = new BoxComponent(152, 48, theme.GetColor(300));
 
@@ -378,7 +378,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             titleText = new TextComponent(fontManager.GetFontTitle(), L"The best steganography tool to hide or\nextract a message in an image.", 48, 129, 916, theme.GetColor(950));
 
             // Step1
-            step1Box = new BoxComponent(48, 293, theme.GetColor(800));
+            step1Box = new BoxComponent(48, 293, theme.GetColor(900));
             step1Text = new TextComponent(fontManager.GetFontLarge(), L"1. Upload the image to start editing it.", 169, 422, 334, theme.GetColor(50));
             step1IconLight = new ImageComponent(ICON_INPUT_LIGHT, 312, 342, 48, 48);
 
@@ -396,7 +396,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             encryptionBox = new BoxComponent(48, 550, theme.GetColor(200));
             encryptionText = new TextComponent(fontManager.GetFontLarge(), L"Hide a Message", 90, 590, 334,  theme.GetColor(950));
             encryptionTextField = new TextFieldComponent(hWnd, ((LPCREATESTRUCT)lParam)->hInstance, 90, 700, 350, 40);
-            encryptionLabelText = new TextComponent(fontManager.GetFontLead(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
+            encryptionLabelText = new TextComponent(fontManager.GetFontLarge(), encryptionTextField->UpdateCharCount(), 90, 670, 334, theme.GetColor(950));
             encryptionTextField->Hide();
 
 			// Drag and Drop Area
@@ -449,10 +449,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 delete previewImage;
                 previewImage = nullptr;
 
-				UpdateState(hWnd, 2);
-
-                InvalidateRect(hWnd, NULL, TRUE);
-
                 // Récupère la fenêtre actuelle
                 HDC hdc = GetDC(hWnd);
 
@@ -461,7 +457,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
                     MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
                 OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
-              
+
+                UpdateState(hWnd, 2);
+
+                InvalidateRect(hWnd, NULL, TRUE);
 
                 ReleaseDC(hWnd, hdc);
             }

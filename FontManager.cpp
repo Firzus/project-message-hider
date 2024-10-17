@@ -1,11 +1,10 @@
 #include "FontManager.h"
 
-FontManager::FontManager() : hFontTitle(NULL), hFontSubtitle(NULL), hFontParagraph(NULL), hFontLead(NULL), hFontLarge(NULL), hFontSmall(NULL), hFontMuted(NULL)
+FontManager::FontManager() : hFontTitle(NULL), hFontSubtitle(NULL), hFontParagraph(NULL), hFontLarge(NULL), hFontSmall(NULL), hFontMuted(NULL)
 {
     hFontTitlePath = L"resources/fonts/Inter-ExtraBold.ttf";
     hFontSubtitlePath = L"resources/fonts/Inter-SemiBold.ttf";
     hFontParagraphPath = L"resources/fonts/Inter-Regular.ttf";
-    hFontLeadPath = L"resources/fonts/Inter-Regular.ttf";
     hFontLargePath = L"resources/fonts/Inter-SemiBold.ttf";
     hFontSmallPath = L"resources/fonts/Inter-Medium.ttf";
     hFontMutedPath = L"resources/fonts/Inter-Regular.ttf";
@@ -17,7 +16,6 @@ void FontManager::LoadFont(HWND hWnd)
     fontCountTitle = AddFontResourceEx(hFontTitlePath.c_str(), FR_PRIVATE, 0);
 	fontCountSubtitle = AddFontResourceEx(hFontSubtitlePath.c_str(), FR_PRIVATE, 0);
 	fontCountParagraph = AddFontResourceEx(hFontParagraphPath.c_str(), FR_PRIVATE, 0);
-	fontCountLead = AddFontResourceEx(hFontLeadPath.c_str(), FR_PRIVATE, 0);
 	fontCountLarge = AddFontResourceEx(hFontLargePath.c_str(), FR_PRIVATE, 0);
 	fontCountSmall = AddFontResourceEx(hFontSmallPath.c_str(), FR_PRIVATE, 0);
 	fontCountMuted = AddFontResourceEx(hFontMutedPath.c_str(), FR_PRIVATE, 0);
@@ -41,14 +39,6 @@ void FontManager::LoadFont(HWND hWnd)
 	if (fontCountParagraph > 0) {
 		hFontParagraph = CreateFont(
 			16, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Inter"
-		);
-	}
-
-	if (fontCountLead > 0) {
-		hFontLead = CreateFont(
-			20, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Inter"
 		);
@@ -78,7 +68,7 @@ void FontManager::LoadFont(HWND hWnd)
 		);
 	}
 
-    if (fontCountTitle == 0 || fontCountSubtitle == 0 || fontCountParagraph == 0 || fontCountLead == 0 || fontCountLarge == 0 || fontCountSmall == 0 || fontCountMuted == 0) {
+    if (fontCountTitle == 0 || fontCountSubtitle == 0 || fontCountParagraph == 0 || fontCountLarge == 0 || fontCountSmall == 0 || fontCountMuted == 0) {
         MessageBox(hWnd, L"Erreur : Impossible de charger une ou plusieurs polices.", L"Erreur", MB_OK | MB_ICONERROR);
     }
 }
