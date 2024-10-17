@@ -4,14 +4,14 @@ Theme::Theme()
 {
     colorPalette[50] = RGB(248, 250, 252);   // #F8FAFC
     colorPalette[100] = RGB(241, 245, 249);  // #F1F5F9
-    colorPalette[200] = RGB(232, 240, 254);  // #E2E8F0
-    colorPalette[300] = RGB(224, 232, 246);  // #CBD5E1
-    colorPalette[400] = RGB(206, 212, 218);  // #94A3B8
-    colorPalette[500] = RGB(173, 181, 189);  // #64748B
-    colorPalette[600] = RGB(108, 117, 125);  // #475569
-    colorPalette[700] = RGB(73, 80, 87);     // #334155
-    colorPalette[800] = RGB(52, 58, 64);     // #1E293B
-    colorPalette[900] = RGB(33, 37, 41);     // #0F172A
+    colorPalette[200] = RGB(226, 232, 240);  // #E2E8F0
+    colorPalette[300] = RGB(203, 213, 225);  // #CBD5E1
+    colorPalette[400] = RGB(148, 163, 184);  // #94A3B8
+    colorPalette[500] = RGB(100, 116, 139);  // #64748B
+    colorPalette[600] = RGB(71, 85, 105);    // #475569
+    colorPalette[700] = RGB(51, 65, 85);     // #334155
+    colorPalette[800] = RGB(30, 41, 59);     // #1E293B
+    colorPalette[900] = RGB(15, 23, 42);     // #0F172A
     colorPalette[950] = RGB(2, 6, 23);       // #020617
 }
 
