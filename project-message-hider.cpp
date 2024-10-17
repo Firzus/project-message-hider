@@ -449,6 +449,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 delete previewImage;
                 previewImage = nullptr;
 
+				UpdateState(hWnd, 2);
+
                 InvalidateRect(hWnd, NULL, TRUE);
 
                 // Récupère la fenêtre actuelle
