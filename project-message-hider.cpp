@@ -126,20 +126,13 @@ void CreateDragAndDropArea()
     dNDCenterX = dragDropArea.left + ((dragDropArea.right - dragDropArea.left) / 2);
     dNDCenterY = dragDropArea.top + ((dragDropArea.bottom - dragDropArea.top) / 2);
     
-    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and Drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 278, theme.GetColor(950));
+    dragAndDropAreaText = new TextComponent(fontManager.GetFontParagraph(), L"Drag and drop the image here.", (dNDCenterX + offsetX), dNDCenterY, 231, theme.GetColor(950));
 }
 
 void DrawDragAndDropArea(HDC hdc)
 {
-    // Colore le background de la zone
-    HBRUSH hBrush = CreateSolidBrush(theme.GetColor(50));
-    FillRect(hdc, &dragDropArea, hBrush);
-
-    // Supprime la brosse utilisée pour éviter une fuite de mémoire
-    DeleteObject(hBrush);
-
     // Crée un stylo en pointillé pour dessiner les bordures
-    HPEN hPen = CreatePen(PS_DASH, 1, RGB(0, 0, 0));
+    HPEN hPen = CreatePen(PS_DASH, 1, theme.GetColor(950));
     HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
     // Dessine le cadre autour de la zone sans remplir
@@ -152,7 +145,9 @@ void DrawDragAndDropArea(HDC hdc)
 
     DeleteObject(hPen);
 
-	if(dragAndDropAreaText) dragAndDropAreaText->Draw(hdc);
+    if (dragAndDropAreaText) {
+        dragAndDropAreaText->Draw(hdc);
+    }
 }
 
 bool IsPointInRect(RECT rect, POINT pt)
