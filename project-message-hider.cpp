@@ -92,7 +92,6 @@ int dNDCenterX;
 int dNDCenterY;
 int offsetX = -118;
 
-bool isAnImageUploaded = false;
 ImageComponent uploadedImage;
 
 void CreateDragAndDropArea()
@@ -349,15 +348,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 // Charge et affiche l'image dans la fenêtre
                 uploadedImage.LoadAndDrawImage(hdc, hWnd, filePath);
-                
-                isAnImageUploaded = true;
 
+                if (uploadedImage.isAnImageLoaded)
+                {
+                    std::wstring path(filePath);
+                    std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
+                    if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
+                        MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
+                    OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
+                }
+                else
+                {
+                    ImageComponent previewImage;
+                    previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);
+                }
 
-                std::wstring path(filePath);
-                std::wstring destPath(path.substr(0, path.find('.')) + L"_encrypted.png");
-                if (messManager.HideMessage(filePath, "Super Secret messs", hdc))
-                    MessageBox(hWnd, (L"You can find your encrypted file at " + destPath).c_str(), L"Succes", MB_OK | MB_ICONINFORMATION);
-                OutputDebugStringA(messManager.GetMessage(destPath, hdc).c_str());
                 ReleaseDC(hWnd, hdc);
             }
         }
@@ -417,7 +422,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if(btnTest) btnTest->Draw(hdc, L"Click Me");
 
             // Preview image
-            if (isAnImageUploaded == false)
+            if (uploadedImage.isAnImageLoaded == false)
             {
                 ImageComponent previewImage;
                 previewImage.LoadAndDrawImage(hdc, hWnd, PREVIEW_IMAGE);

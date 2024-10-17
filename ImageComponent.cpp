@@ -124,12 +124,15 @@ void ImageComponent::DrawImage(HDC hdc, HWND hwnd)
     BITMAP bitmap;
     GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
-    // Limite les dimensions
+
+    // Limite les dimensions de l'image importée
     if (bitmap.bmWidth > dimensionLimit && bitmap.bmHeight > dimensionLimit)
     {
         // Affiche une erreur si les dimensions de l'image sont trop grandes
 
         MessageBox(hwnd, L"Erreur: L'image est trop grande.", L"Erreur de dimensions", MB_OK | MB_ICONERROR);
+
+        isAnImageLoaded = false;
     }
     else
     {
@@ -139,6 +142,8 @@ void ImageComponent::DrawImage(HDC hdc, HWND hwnd)
 
         // Affiche l'image dans la fenêtre avec les dimensions spécifiées
         StretchBlt(hdc, uploadedImagePosX, uploadedImagePosY, squareSize, squareSize, hdcMem, 0, 0, srcWidth, srcHeight, SRCCOPY);
+
+        isAnImageLoaded = true;
     }
 
     DeleteDC(hdcMem);
